@@ -4,17 +4,13 @@
  For the full text of the license visit http://copyright.genie-mc.org
  or see $GENIE/LICENSE
 
+ Author: Anthony LaTorre <tlatorre at uchicago dot edu>
+         University of Chicago
+
+ based on GBGLRSAtmoFlux.cxx by 
+
  Author: Christopher Backhouse <c.backhouse1@physics.ox.ac.uk>
          Oxford University
-
- For the class documentation see the corresponding header file.
- @ Feb 05, 2008 - CB
-   This concrete flux driver was added in 2.3.1 by C.Backhouse (Oxford U.)
- @ Feb 23, 2010 - CA
-   Build bin arrays at ctor. Re-structuring and clean-up.
- @ Feb 23, 2012 - AB
-   Combine the flux calculations at low and high energies.
-
 */
 //____________________________________________________________________________
 
@@ -24,7 +20,7 @@
 #include <TH3D.h>
 #include <TMath.h>
 
-#include "FluxDrivers/GBGLRSAtmoFlux.h"
+#include "FluxDrivers/GBGLRSLowEAtmoFlux.h"
 #include "Messenger/Messenger.h"
 #include "Conventions/Constants.h"
 
@@ -38,138 +34,129 @@ using namespace genie;
 using namespace genie::flux;
 using namespace genie::constants;
 
-//____________________________________________________________________________
 GBGLRSAtmoFlux::GBGLRSAtmoFlux() :
 GAtmoFlux()
 {
   LOG("Flux", pNOTICE)
-     << "Instantiating the GENIE BGLRS atmospheric neutrino flux driver";
+     << "Instantiating the GENIE BGLRS + low energy atmospheric neutrino flux driver";
 
   this->Initialize();
   this->SetBinSizes();
 }
-//___________________________________________________________________________
+
 GBGLRSAtmoFlux::~GBGLRSAtmoFlux()
 {
 
 }
-//___________________________________________________________________________
+
+/* Generate the correct cos(theta) and energy bin sizes.
+ *
+ * The cos(theta) bins are equivalent to np.linspace(-1,1,21) and the energy
+ * bins are equivalent to np.logspace(-2,1,61). */
 void GBGLRSAtmoFlux::SetBinSizes(void)
 {
-// Generate the correct cos(theta) and energy bin sizes.
-//
-// Zenith angle binning: the flux is given in 20 bins of 
-// cos(zenith angle) from -1.0 to 1.0 (bin width = 0.1) 
-//
-// Neutrino energy binning: the Bartol flux files are 
-// provided in two pieces 
-//  (1) low energy piece (<10 GeV), solar min or max,
-//      given in 40 log-spaced bins from 0.1 to 10 GeV 
-//      (20 bins per decade)
-//  (2) high energy piece (>10 GeV), without solar effects, 
-//      given in 30 log-spaced bins from 10 to 1000 GeV
-//      (10 bins per decade)
-     
+  unsigned int i;
+  double costheta, logE, dcostheta, logEmin, dlogE;
+
+  costheta = kBGLRSLowE3DCosThetaMin;
+
   fPhiBins       = new double [2];
-  fCosThetaBins  = new double [kBGLRS3DNumCosThetaBins + 1];
-  fEnergyBins    = new double [kBGLRS3DNumLogEvBinsLow + kBGLRS3DNumLogEvBinsHigh + 1];
+  fCosThetaBins  = new double [kBGLRSLowE3DNumCosThetaBins + 1];
+  fEnergyBins    = new double [kBGLRSLowE3DNumLogEvBins + 1];
 
   fPhiBins[0] = 0;
   fPhiBins[1] = 2.*kPi;
-   
-  double dcostheta =
-      (kBGLRS3DCosThetaMax - kBGLRS3DCosThetaMin) / 
-      (double) kBGLRS3DNumCosThetaBins;
+
+  dcostheta = (kBGLRSLowE3DCosThetaMax - kBGLRSLowE3DCosThetaMin)/(double) kBGLRSLowE3DNumCosThetaBins;
      
-  double logEmin = TMath::Log10(kBGLRS3DEvMin);
-  double dlogElow = 1.0 / (double) kBGLRS3DNumLogEvBinsPerDecadeLow;
-  double dlogEhigh = 1.0 / (double) kBGLRS3DNumLogEvBinsPerDecadeHigh;
+  logEmin = TMath::Log10(kBGLRSLowE3DEvMin);
+  dlogE = 1.0/(double) kBGLRSLowE3DNumLogEvBinsPerDecade;
 
-  double costheta = kBGLRS3DCosThetaMin;
-
-  for(unsigned int i=0; i<= kBGLRS3DNumCosThetaBins; i++) {
-    if( i==0 ) ; // do nothing
-    else costheta += dcostheta;
+  costheta = kBGLRSLowE3DCosThetaMin;
+  for (i = 0; i <= kBGLRSLowE3DNumCosThetaBins; i++) {
+    if (i > 0)
+      costheta += dcostheta;
     fCosThetaBins[i] = costheta;
-    if(i != kBGLRS3DNumCosThetaBins) {
+    if (i != kBGLRSLowE3DNumCosThetaBins) {
       LOG("Flux", pDEBUG)
         << "FLUKA 3d flux: CosTheta bin " << i+1
         << ": lower edge = " << fCosThetaBins[i];
     } else {
       LOG("Flux", pDEBUG)
-        << "FLUKA 3d flux: CosTheta bin " << kBGLRS3DNumCosThetaBins
-        << ": upper edge = " << fCosThetaBins[kBGLRS3DNumCosThetaBins];
+        << "FLUKA 3d flux: CosTheta bin " << kBGLRSLowE3DNumCosThetaBins
+        << ": upper edge = " << fCosThetaBins[kBGLRSLowE3DNumCosThetaBins];
     }
   }
      
-  double logE = logEmin;
- 
-  for(unsigned int i=0; i<=kBGLRS3DNumLogEvBinsLow+kBGLRS3DNumLogEvBinsHigh; i++) {
-    if( i==0 ) ; // do nothing
-    else if( i<=kBGLRS3DNumLogEvBinsLow ) logE += dlogElow;
-    else                                  logE += dlogEhigh;
+  logE = logEmin;
+  for (i = 0; i <= kBGLRSLowE3DNumLogEvBins; i++) {
+    if (i > 0)
+      logE += dlogE;
     fEnergyBins[i] = TMath::Power(10.0, logE);
-    if(i != kBGLRS3DNumLogEvBinsLow+kBGLRS3DNumLogEvBinsHigh) {
+    if (i != kBGLRSLowE3DNumLogEvBins) {
       LOG("Flux", pDEBUG)
          << "FLUKA 3d flux: Energy bin " << i+1
          << ": lower edge = " << fEnergyBins[i];
     } else {
       LOG("Flux", pDEBUG)
-         << "FLUKA 3d flux: Energy bin " << kBGLRS3DNumLogEvBinsLow+kBGLRS3DNumLogEvBinsHigh
-         << ": upper edge = " << fEnergyBins[kBGLRS3DNumLogEvBinsLow+kBGLRS3DNumLogEvBinsHigh];
-    } 
-  }      
+         << "FLUKA 3d flux: Energy bin " << kBGLRSLowE3DNumLogEvBinsLow+kBGLRSLowE3DNumLogEvBinsHigh
+         << ": upper edge = " << fEnergyBins[kBGLRSLowE3DNumLogEvBinsLow+kBGLRSLowE3DNumLogEvBinsHigh];
+    }
+  }
 
   fNumPhiBins      = 1;
-  fNumCosThetaBins = kBGLRS3DNumCosThetaBins;
-  fNumEnergyBins   = kBGLRS3DNumLogEvBinsLow + kBGLRS3DNumLogEvBinsHigh; 
+  fNumCosThetaBins = kBGLRSLowE3DNumCosThetaBins;
+  fNumEnergyBins   = kBGLRSLowE3DNumLogEvBins; 
   fMaxEv = fEnergyBins[fNumEnergyBins];
 }
-//___________________________________________________________________________
+
 bool GBGLRSAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
 {
+  unsigned int i;
+  int ibin;
+  double energy, costheta, flux;
+  double junkd; // throw away 4th column
+
   LOG("Flux", pNOTICE) 
-    << "Loading BGLRS flux for neutrino: " << nu_pdg 
+    << "Loading BGLRS low energy flux for neutrino: " << nu_pdg 
     << " from file: " << filename;
 
   TH3D* histo = 0;
   std::map<int,TH3D*>::iterator myMapEntry = fRawFluxHistoMap.find(nu_pdg);
-  if( myMapEntry != fRawFluxHistoMap.end() ){
+  if (myMapEntry != fRawFluxHistoMap.end()){
       histo = myMapEntry->second;
   }
-  if(!histo) {
+
+  if (!histo) {
      LOG("Flux", pERROR) << "Null flux histogram!";
      return false;
   }
+
   ifstream flux_stream(filename.c_str(), ios::in);
-  if(!flux_stream) {
+
+  if (!flux_stream) {
      LOG("Flux", pERROR) << "Could not open file: " << filename;
      return false;
   }
 
-  int ibin;
-  double energy, costheta, flux;
-  double junkd; // throw away error estimates
-
-  double scale = 1.0; // 1.0 [m^2], OR 1.0e-4 [cm^2]
-
   // throw away comment line
   flux_stream.ignore(99999, '\n');
 
-  while ( !flux_stream.eof() ) {
+  i = 0;
+  while (!flux_stream.eof()) {
+    i += 1;
+
     flux = 0.0;
-    flux_stream >> energy >> costheta >> flux >> junkd >> junkd;
-    if( flux>0.0 ){
-      // Compensate for logarithmic units - dlogE=dE/E
-      // [Note: should do this explicitly using bin widths]
-      flux /= energy;
+    flux_stream >> energy >> costheta >> flux >> junkd;
+    if (flux > 0) {
       LOG("Flux", pINFO)
         << "Flux[Ev = " << energy 
         << ", cos8 = " << costheta << "] = " << flux;
-      ibin = histo->FindBin( (Axis_t)energy, (Axis_t)costheta, (Axis_t)kPi );
-      histo->SetBinContent( ibin, (Stat_t)(scale*flux) );
+      ibin = histo->FindBin((Axis_t) energy, (Axis_t) costheta, (Axis_t) kPi);
+      histo->SetBinContent(ibin, (Stat_t)(flux));
+    } else {
+      LOG("Flux", pERROR) << "Flux on line " << i << " is " << flux << " which is negative!";
     }
   }
   return true;
 }
-//___________________________________________________________________________

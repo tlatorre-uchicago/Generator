@@ -469,6 +469,10 @@ GAtmoFlux* GetFlux(void)
      GBGLRSAtmoFlux * bartol_flux = new GBGLRSAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
   } else 
+  if(gOptFluxSim == "BGLRSLowE") {
+     GBGLRSLowEAtmoFlux * bartol_flux = new GBGLRSLowEAtmoFlux;
+     atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
+  } else 
   if(gOptFluxSim == "HAKKM") {
      GHAKKMAtmoFlux * honda_flux = new GHAKKMAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(honda_flux);

@@ -1,37 +1,24 @@
 //____________________________________________________________________________
 /*!
 
-\class   genie::flux::GBGLRSAtmoFlux
+\class   genie::flux::GBGLRSLowEAtmoFlux
 
-\brief   A flux driver for the Bartol Atmospheric Neutrino Flux
+\brief   A flux driver for a combined version of the Bartol Atmospheric
+         Neutrino Flux and the Battistoni flux at low energies.
 
-\ref     G. Barr, T.K. Gaisser, P. Lipari, S. Robbins and T. Stanev,
-         astro-ph/0403630
-
-         To be able to use this flux driver you will need to download the
-         flux data from:  http://www-pnp.physics.ox.ac.uk/~barr/fluxfiles/
-
-         Please note that this class expects to read flux files formatted as 
+\ref     Please note that this class expects to read flux files formatted as 
          described in the above BGLRS flux page.
          Each file contains 5 columns:
          - neutrino energy (GeV) at bin centre
          - neutrino cos(zenith angle) at bin centre
-         - neutrino flux dN/dlnE (#neutrinos /m^2 /sec /sr)
-         - MC statistical error on the flux (not used here)
-         - Number of unweighted events entering in the bin (not used here)
-         The flux is given in 20 bins of cos(zenith angle) from -1.0 to 1.0 
-         (bin width = 0.1) and 30 equally log-spaced energy bins (10 bins per 
-         decade), with Emin = 10.00 GeV.
+         - neutrino flux dN/dE (#neutrinos /m^2 /sec /sr)
 
-         Note that in the BGLRS input files the flux is defined as dN/dlnE, 
-         while in the FLUKA files the flux is defined as dN/dE.
-         We compensate for logarithmic units (dlnE = dE/E) as we read-in the
-         BGLRS files.
+\author  Anthony LaTorre <tlatorre at uchicago dot edu>
+         University of Chicago
 
-\author  Christopher Backhouse <c.backhouse1@physics.ox.ac.uk>
-         Oxford University
+based heavily on GBGLRSAtmoFlux by Christopher Backhouse.
 
-\created January 26, 2008
+\created February 17, 2020
 
 \cpright  Copyright (c) 2003-2017, GENIE Neutrino MC Generator Collaboration
           For the full text of the license visit http://copyright.genie-mc.org
@@ -39,8 +26,8 @@
 */
 //____________________________________________________________________________
 
-#ifndef _GENIE_BGLRS_ATMO_FLUX_H_
-#define _GENIE_BGLRS_ATMO_FLUX_H_
+#ifndef _GENIE_BGLRS_LOWE_ATMO_FLUX_H_
+#define _GENIE_BGLRS_LOWE_ATMO_FLUX_H_
 
 #include "FluxDrivers/GAtmoFlux.h"
 
@@ -48,14 +35,13 @@ namespace genie {
 namespace flux  {
 
 // Number of cos(zenith) and energy bins in flux simulation
-const unsigned int kBGLRS3DNumCosThetaBins           = 20;
-const double       kBGLRS3DCosThetaMin               = -1.0;
-const double       kBGLRS3DCosThetaMax               =  1.0;
-const unsigned int kBGLRS3DNumLogEvBinsLow           = 40;
-const unsigned int kBGLRS3DNumLogEvBinsPerDecadeLow  = 20;
-const unsigned int kBGLRS3DNumLogEvBinsHigh          = 30;
-const unsigned int kBGLRS3DNumLogEvBinsPerDecadeHigh = 10;
-const double       kBGLRS3DEvMin                     = 0.1; // GeV
+const unsigned int kBGLRSLowE3DNumCosThetaBins           = 20;
+const double       kBGLRSLowE3DCosThetaMin               = -1.0;
+const double       kBGLRSLowE3DCosThetaMax               =  1.0;
+/* Energy bins are equivalent to np.logspace(-2,1,61). */
+const unsigned int kBGLRSLowE3DNumLogEvBins              = 60;
+const unsigned int kBGLRSLowE3DNumLogEvBinsPerDecade     = 20;
+const double       kBGLRSLowE3DEvMin                     = 0.01; // GeV
 
 class GBGLRSAtmoFlux: public GAtmoFlux {
 
