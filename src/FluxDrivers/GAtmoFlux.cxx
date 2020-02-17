@@ -661,7 +661,7 @@ double GAtmoFlux::GetTotalFlux(void)
   for (; rawiter != fRawFluxHistoMap.end(); ++rawiter) {
     TH3D *h = rawiter->second;
     if (h) {
-      flux += h.Integral("width");
+      flux += h->Integral("width");
     }
   }
 

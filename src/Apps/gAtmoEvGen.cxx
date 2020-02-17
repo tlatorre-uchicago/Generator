@@ -306,7 +306,8 @@ double          kDefOptEvMax        = 50.0;    // max neutrino energy (override 
 //________________________________________________________________________________________
 int main(int argc, char** argv)
 {
-  double total_flux, expected_events;
+  GAtmoFlux* atmo_flux_driver;
+  double total_flux, expected_neutrinos;
 
   // Parse command line arguments
   GetCommandLineArgs(argc,argv);
@@ -318,7 +319,7 @@ int main(int argc, char** argv)
   utils::app_init::XSecTable(gOptInpXSecFile, true);
 
   // get flux driver
-  GFluxI * flux_driver = GetFlux();
+  atmo_flux_driver = GetFlux();
 
   // get geometry driver
   GeomAnalyzerI * geom_driver = GetGeometry();
@@ -326,7 +327,7 @@ int main(int argc, char** argv)
   // create the GENIE monte carlo job driver
   GMCJDriver* mcj_driver = new GMCJDriver;
   mcj_driver->SetEventGeneratorList(RunOpt::Instance()->EventGeneratorList());
-  mcj_driver->UseFluxDriver(flux_driver);
+  mcj_driver->UseFluxDriver(dynamic_cast<GFluxI *>(atmo_flux_driver));
   mcj_driver->UseGeomAnalyzer(geom_driver);
   mcj_driver->Configure();
   mcj_driver->UseSplines();
@@ -344,12 +345,12 @@ int main(int argc, char** argv)
   // Set GHEP print level
   GHepRecord::SetPrintLevel(RunOpt::Instance()->EventRecordPrintLevel());
 
-  total_flux = flux_driver->GetTotalFlux();
+  total_flux = atmo_flux_driver->GetTotalFlux();
   if (gOptSecExposure > 0) {
     /* Calculate the expected value of the total number of neutrinos we need to
      * throw. We do this by multiplying the total flux by the exposure time in
      * seconds and the area of the flux surface. */
-    expected_neutrinos = total_flux*gOptSecExposure*M_PI*pow(flux_driver->GetTransverseRadius(),2);
+    expected_neutrinos = total_flux*gOptSecExposure*M_PI*pow(atmo_flux_driver->GetTransverseRadius(),2);
   }
 
   // event loop
@@ -359,7 +360,7 @@ int main(int argc, char** argv)
     EventRecord* event = mcj_driver->GenerateEvent();
 
     // set weight (if using a weighted flux)
-    //event->SetWeight(event->Weight()*flux_driver->Weight());
+    //event->SetWeight(event->Weight()*atmo_flux_driver->Weight());
 
     // print-out
     LOG("gevgen_atmo", pNOTICE) << "Generated event: " << *event;
@@ -381,7 +382,7 @@ int main(int argc, char** argv)
 
   // clean-up
   delete geom_driver;
-  delete flux_driver;
+  delete atmo_flux_driver;
   delete mcj_driver;
 
   return 0;
@@ -452,8 +453,6 @@ GeomAnalyzerI* GetGeometry(void)
 //________________________________________________________________________________________
 GFluxI* GetFlux(void)
 {
-  GFluxI * flux_driver = 0;
-
 #ifdef __GENIE_FLUX_DRIVERS_ENABLED__
 
   // Instantiate appropriate concrete flux driver
@@ -493,8 +492,6 @@ GFluxI* GetFlux(void)
   if(!gOptRot.IsIdentity()) {
      atmo_flux_driver->SetUserCoordSystem(gOptRot);
   }
-  // Cast to GFluxI, the generic flux driver interface 
-  flux_driver = dynamic_cast<GFluxI *>(atmo_flux_driver);
 
 #else
   LOG("gevgen_atmo", pFATAL) << "You need to enable the GENIE flux drivers first!";
