@@ -224,6 +224,7 @@
 #include <vector>
 #include <sstream>
 #include <map>
+#include <iomanip>
 
 #include <TRotation.h>
 
@@ -263,6 +264,7 @@ using std::string;
 using std::vector;
 using std::map;
 using std::ostringstream;
+using std::setprecision;
 
 using namespace genie;
 using namespace genie::flux;
@@ -346,11 +348,13 @@ int main(int argc, char** argv)
   GHepRecord::SetPrintLevel(RunOpt::Instance()->EventRecordPrintLevel());
 
   total_flux = atmo_flux_driver->GetTotalFlux();
+  LOG("gevgen_atmo", pNOTICE) << "Total atmospheric neutrino flux is " << setprecision(2) << total_flux << " neutrinos per m^2 per second.";
   if (gOptSecExposure > 0) {
     /* Calculate the expected value of the total number of neutrinos we need to
      * throw. We do this by multiplying the total flux by the exposure time in
      * seconds and the area of the flux surface. */
     expected_neutrinos = total_flux*gOptSecExposure*M_PI*pow(atmo_flux_driver->GetTransverseRadius(),2);
+    LOG("gevgen_atmo", pNOTICE) << "Simulating an exposure of " << setprecision(0) << gOptSecExposure << " seconds which corresponds to a total of " << setprecision(0) << expected_neutrinos << " neutrinos.";
   }
 
   // event loop
