@@ -296,6 +296,10 @@ string          gOptEvFilePrefix;              // event file prefix
 TRotation       gOptRot;                       // coordinate rotation matrix: topocentric horizontal -> user-defined topocentric system
 long int        gOptRanSeed;                   // random number seed
 string          gOptInpXSecFile;               // cross-section splines
+double          gOptRL = -1;                   // distance of flux ray generation surface (m)
+double          gOptRT = -1;                   // radius of flux ray generation surface (m)
+
+
 
 // Defaults:
 //
@@ -321,11 +325,21 @@ int main(int argc, char** argv)
   utils::app_init::RandGen(gOptRanSeed);
   utils::app_init::XSecTable(gOptInpXSecFile, true);
 
-  // get flux driver
-  atmo_flux_driver = GetFlux();
-
   // get geometry driver
   GeomAnalyzerI * geom_driver = GetGeometry();
+
+  if (gOptRT < 0) {
+    LOG("gevgen_atmo", pINFO) << "Warning! Flux surface transverse radius not specified so using default value of 10 meters!";
+    gOptRT = 10;
+  }
+
+  if (gOptRL < 0) {
+    LOG("gevgen_atmo", pINFO) << "Warning! Flux surface longitudinal radius not specified so using default value of 10 meters!";
+    gOptRL = 10;
+  }
+
+  // get flux driver
+  atmo_flux_driver = GetFlux();
 
   // create the GENIE monte carlo job driver
   GMCJDriver* mcj_driver = new GMCJDriver;
@@ -422,12 +436,21 @@ GeomAnalyzerI* GetGeometry(void)
       gAbortingInErr = true;
       exit(1);
     }
-/*
+
+    /* If flux generation surface isn't defined, get the bounding box for the
+     * geometry and set something appropriate. */
     TGeoShape * bounding_box = topvol->GetShape();
-    bounding_box->GetAxisRange(3, zmin, zmax);
-    zmin *= rgeom->LengthUnits();
-    zmax *= rgeom->LengthUnits();
-*/
+    TGeoBBox *  box = (TGeoBBox *)TS;
+    dx = box->GetDX()*rgeom->LengthUnits();
+    dy = box->GetDY()*rgeom->LengthUnits();
+    dz = box->GetDZ()*rgeom->LengthUnits();
+
+    if (gOptRL < 0 && gOptRT < 0) {
+      gOptRL = sqrt(dx*dx + dy*dy + dz*dz);
+      gOptRT = gOptRL;
+      LOG("gevgen_atmo", pINFO) << "Setting flux longitudinal and transverse radius to " << setprecision(2) << gOptRL << " meters based on bounding box of ROOT geometry.";
+    }
+
     // switch on/off volumes as requested
     if ( (gOptRootGeomTopVol[0] == '+') || (gOptRootGeomTopVol[0] == '-') ) {
       bool exhaust = (*gOptRootGeomTopVol.c_str() == '+');
@@ -499,7 +522,7 @@ GAtmoFlux* GetFlux(void)
   }
   atmo_flux_driver->LoadFluxData();
   // configure flux generation surface:
-  atmo_flux_driver->SetRadii(10, 10);
+  atmo_flux_driver->SetRadii(gOptRL, gOptRT);
   // set rotation for coordinate tranformation from the topocentric horizontal
   // system to a user-defined coordinate system:
   if(!gOptRot.IsIdentity()) {
