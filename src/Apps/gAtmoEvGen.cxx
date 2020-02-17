@@ -131,7 +131,7 @@
               Specifies how many events to generate.
            -e 
               Specifies requested exposure in terms of kton*yrs.
-           -T 
+           -T
               Specifies requested exposure in terms of seconds.
            -E 
               Specifies the neutrino energy in GeV. 
@@ -503,7 +503,7 @@ GAtmoFlux* GetFlux(void)
   if(gOptFluxSim == "BGLRSLOWE") {
      GBGLRSLowEAtmoFlux * bartol_flux = new GBGLRSLowEAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
-  } else 
+  } else
   if(gOptFluxSim == "HAKKM") {
      GHAKKMAtmoFlux * honda_flux = new GHAKKMAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(honda_flux);
@@ -598,14 +598,14 @@ void GetCommandLineArgs(int argc, char ** argv)
 
   if (parser.OptionExists('T')) {
     if (have_required_statistics) {
-      LOG("gevgen_atmo", pFATAL) 
+      LOG("gevgen_atmo", pFATAL)
          << "Can't request exposure both in terms of number of events or kton*yrs and time"
          << "\nUse just one of the -n, -e, or -T options";
       PrintSyntax();
       gAbortingInErr = true;
       exit(1);
     }
-    LOG("gevgen_atmo", pDEBUG) 
+    LOG("gevgen_atmo", pDEBUG)
         << "Reading requested exposure in seconds";
     gOptSecExposure = parser.ArgAsDouble('T');
     have_required_statistics = true;
@@ -689,10 +689,10 @@ void GetCommandLineArgs(int argc, char ** argv)
     }
     if((gOptFluxSim != "FLUKA") && 
        (gOptFluxSim != "BGLRS") && 
-       (gOptFluxSim != "BGLRSLOWE") && 
+       (gOptFluxSim != "BGLRSLOWE") &&
        (gOptFluxSim != "HAKKM")) {
         LOG("gevgen_atmo", pFATAL) 
-             << "The flux file source needs to be one of <FLUKA,BGLRS,BGLRSLOWE,HAKKM>"; 
+             << "The flux file source needs to be one of <FLUKA,BGLRS,BGLRSLOWE,HAKKM>";
         PrintSyntax();
         gAbortingInErr = true;
         exit(1);

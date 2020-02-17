@@ -6,7 +6,7 @@
 \brief   A flux driver for a combined version of the Bartol Atmospheric
          Neutrino Flux and the Battistoni flux at low energies.
 
-\ref     Please note that this class expects to read flux files formatted as 
+\ref     Please note that this class expects to read flux files formatted as
          described in the above BGLRS flux page.
          Each file contains 5 columns:
          - neutrino energy (GeV) at bin centre
@@ -49,11 +49,9 @@ public :
   GBGLRSLowEAtmoFlux();
  ~GBGLRSLowEAtmoFlux();
 
-  //     
   // Most implementation is derived from the base GAtmoFlux
   // The concrete driver is only required to implement a function for
   // loading the input data files
-  //
 
 private:
 

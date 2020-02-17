@@ -71,7 +71,7 @@ void GBGLRSLowEAtmoFlux::SetBinSizes(void)
   fPhiBins[1] = 2.*kPi;
 
   dcostheta = (kBGLRSLowE3DCosThetaMax - kBGLRSLowE3DCosThetaMin)/(double) kBGLRSLowE3DNumCosThetaBins;
-     
+
   logEmin = TMath::Log10(kBGLRSLowE3DEvMin);
   dlogE = 1.0/(double) kBGLRSLowE3DNumLogEvBinsPerDecade;
 
@@ -89,7 +89,7 @@ void GBGLRSLowEAtmoFlux::SetBinSizes(void)
         << ": upper edge = " << fCosThetaBins[kBGLRSLowE3DNumCosThetaBins];
     }
   }
-     
+
   logE = logEmin;
   for (i = 0; i <= kBGLRSLowE3DNumLogEvBins; i++) {
     if (i > 0)
@@ -108,7 +108,7 @@ void GBGLRSLowEAtmoFlux::SetBinSizes(void)
 
   fNumPhiBins      = 1;
   fNumCosThetaBins = kBGLRSLowE3DNumCosThetaBins;
-  fNumEnergyBins   = kBGLRSLowE3DNumLogEvBins; 
+  fNumEnergyBins   = kBGLRSLowE3DNumLogEvBins;
   fMaxEv = fEnergyBins[fNumEnergyBins];
 }
 
@@ -120,8 +120,8 @@ bool GBGLRSLowEAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
   string str;
   TH3D* histo;
 
-  LOG("Flux", pNOTICE) 
-    << "Loading BGLRS low energy flux for neutrino: " << nu_pdg 
+  LOG("Flux", pNOTICE)
+    << "Loading BGLRS low energy flux for neutrino: " << nu_pdg
     << " from file: " << filename;
 
   std::map<int,TH3D*>::iterator myMapEntry = fRawFluxHistoMap.find(nu_pdg);
@@ -157,7 +157,7 @@ bool GBGLRSLowEAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
     ss >> energy >> costheta >> flux;
     if (flux > 0) {
       LOG("Flux", pINFO)
-        << "Flux[Ev = " << energy 
+        << "Flux[Ev = " << energy
         << ", cos = " << costheta << "] = " << flux;
       ibin = histo->FindBin((Axis_t) energy, (Axis_t) costheta, (Axis_t) kPi);
       histo->SetBinContent(ibin, (Stat_t)(flux));

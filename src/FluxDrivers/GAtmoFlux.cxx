@@ -666,7 +666,7 @@ double GAtmoFlux::GetTotalFlux(void)
   }
 
   return flux;
-} 
+}
 
 //___________________________________________________________________________
 double GAtmoFlux::GetFlux(int flavour)
