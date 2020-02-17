@@ -470,7 +470,7 @@ GAtmoFlux* GetFlux(void)
      GBGLRSAtmoFlux * bartol_flux = new GBGLRSAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
   } else 
-  if(gOptFluxSim == "BGLRSLowE") {
+  if(gOptFluxSim == "BGLRSLOWE") {
      GBGLRSLowEAtmoFlux * bartol_flux = new GBGLRSLowEAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
   } else 
@@ -478,7 +478,7 @@ GAtmoFlux* GetFlux(void)
      GHAKKMAtmoFlux * honda_flux = new GHAKKMAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(honda_flux);
   } else {
-     LOG("gevgen_atmo", pFATAL) << "Uknonwn flux simulation: " << gOptFluxSim;
+     LOG("gevgen_atmo", pFATAL) << "Unknown flux simulation: " << gOptFluxSim;
      gAbortingInErr = true;
      exit(1);
   }
