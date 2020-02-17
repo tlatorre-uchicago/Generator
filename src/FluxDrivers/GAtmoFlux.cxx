@@ -414,12 +414,12 @@ void GAtmoFlux::SetRadii(double Rlongitudinal, double Rtransverse)
   fRt = Rtransverse;
 }
 
-void GAtmoFlux::GetLongitudinalRadius(void)
+double GAtmoFlux::GetLongitudinalRadius(void)
 {
   return fRl;
 }
 
-void GAtmoFlux::GetTransverseRadius(void)
+double GAtmoFlux::GetTransverseRadius(void)
 {
   return fRt;
 }
@@ -661,7 +661,7 @@ double GAtmoFlux::GetTotalFlux(void)
   for (; rawiter != fRawFluxHistoMap.end(); ++rawiter) {
     TH3D *h = rawiter->second;
     if (h) {
-      total_flux += h.Integral("width");
+      flux += h.Integral("width");
     }
   }
 

@@ -88,8 +88,8 @@ public :
   void     ForceMaxEnergy     (double emax);
   void     SetSpectralIndex   (double index); 
   void     SetRadii           (double Rlongitudinal, double Rtransverse);
-  void     GetLongitudinalRadius(void);
-  void     GetTransverseRadius(void);
+  double   GetLongitudinalRadius(void);
+  double   GetTransverseRadius(void);
 
   void     SetUserCoordSystem (TRotation & rotation); ///< Rotation: Topocentric Horizontal -> User-defined Topocentric Coord System.
   void     AddFluxFile        (int neutrino_pdg, string filename);
