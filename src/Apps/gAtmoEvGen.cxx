@@ -17,7 +17,8 @@
                        [-L geometry_length_units]
                        [-D geometry_density_units]
                        <-n n_of_events,
-                        -e exposure_in_kton_x_yrs >
+                        -e exposure_in_kton_x_yrs
+                        -T exposure_in_seconds >
                         -E min_energy,max_energy
                        [-o output_event_file_prefix]
                        [--seed random_number_seed]
@@ -305,6 +306,8 @@ double          kDefOptEvMax        = 50.0;    // max neutrino energy (override 
 //________________________________________________________________________________________
 int main(int argc, char** argv)
 {
+  double total_flux, expected_events;
+
   // Parse command line arguments
   GetCommandLineArgs(argc,argv);
 
@@ -341,8 +344,16 @@ int main(int argc, char** argv)
   // Set GHEP print level
   GHepRecord::SetPrintLevel(RunOpt::Instance()->EventRecordPrintLevel());
 
+  total_flux = flux_driver->GetTotalFlux();
+  if (gOptSecExposure > 0) {
+    /* Calculate the expected value of the total number of neutrinos we need to
+     * throw. We do this by multiplying the total flux by the exposure time in
+     * seconds and the area of the flux surface. */
+    expected_neutrinos = total_flux*gOptSecExposure*M_PI*pow(flux_driver->GetTransverseRadius(),2);
+  }
+
   // event loop
-  for(int iev = 0; iev < gOptNev; iev++) {
+  for(int iev = 0; gOptNev > 0 ? iev < gOptNev : 1; iev++) {
 
     // generate next event
     EventRecord* event = mcj_driver->GenerateEvent();
@@ -359,6 +370,10 @@ int main(int argc, char** argv)
 
     // clean-up
     delete event;
+
+    if (gOptSecExposure && mcj_driver->NFluxNeutrinos()/mcj_driver->GlobProbScale() > expected_neutrinos) {
+      break;
+    }
   }
 
   // save the event file
@@ -969,7 +984,8 @@ void PrintSyntax(void)
    << "\n           [-L geometry_length_units]"
    << "\n           [-D geometry_density_units]"
    << "\n           <-n n_of_events,"
-   << "\n            -e exposure_in_kton_x_yrs>"
+   << "\n            -e exposure_in_kton_x_yrs"
+   << "\n            -T exposure_in_seconds>"
    << "\n            -E min_energy,max_energy"
    << "\n           [-o output_event_file_prefix]"
    << "\n           [--seed random_number_seed]"
