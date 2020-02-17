@@ -659,6 +659,7 @@ void GetCommandLineArgs(int argc, char ** argv)
     }
     if((gOptFluxSim != "FLUKA") && 
        (gOptFluxSim != "BGLRS") && 
+       (gOptFluxSim != "BGLRSLowE") && 
        (gOptFluxSim != "HAKKM")) {
         LOG("gevgen_atmo", pFATAL) 
              << "The flux file source needs to be one of <FLUKA,BGLRS,HAKKM>"; 
