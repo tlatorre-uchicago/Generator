@@ -269,7 +269,7 @@ using namespace genie::flux;
 
 void            GetCommandLineArgs (int argc, char ** argv);
 void            PrintSyntax        (void);
-GFluxI *        GetFlux            (void);
+GAtmoFlux*      GetFlux            (void);
 GeomAnalyzerI * GetGeometry        (void);
 
 // User-specified options:
@@ -451,7 +451,7 @@ GeomAnalyzerI* GetGeometry(void)
   return geom_driver;
 }
 //________________________________________________________________________________________
-GFluxI* GetFlux(void)
+GAtmoFlux* GetFlux(void)
 {
 #ifdef __GENIE_FLUX_DRIVERS_ENABLED__
 
@@ -500,7 +500,7 @@ GFluxI* GetFlux(void)
   exit(1);
 #endif
 
-  return flux_driver;
+  return atmo_flux_driver;
 }
 //________________________________________________________________________________________
 void GetCommandLineArgs(int argc, char ** argv)
