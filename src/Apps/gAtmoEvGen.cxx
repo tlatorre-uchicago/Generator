@@ -490,7 +490,7 @@ GAtmoFlux* GetFlux(void)
   }
   atmo_flux_driver->LoadFluxData();
   // configure flux generation surface:
-  atmo_flux_driver->SetRadii(1, 1);
+  atmo_flux_driver->SetRadii(10, 10);
   // set rotation for coordinate tranformation from the topocentric horizontal
   // system to a user-defined coordinate system:
   if(!gOptRot.IsIdentity()) {
