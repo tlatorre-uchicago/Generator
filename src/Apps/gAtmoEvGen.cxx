@@ -130,6 +130,8 @@
               Specifies how many events to generate.
            -e 
               Specifies requested exposure in terms of kton*yrs.
+           -T 
+              Specifies requested exposure in terms of seconds.
            -E 
               Specifies the neutrino energy in GeV. 
               Must be a comma-separated pair of numbers, eg `-E 0.3,70'
@@ -283,6 +285,7 @@ double          gOptGeomDUnits = 0;            // input geometry density units
 string          gOptExtMaxPlXml;               // max path lengths XML file for input geometry
 int             gOptNev = -1;                  // exposure - in terms of number of events 
 double          gOptKtonYrExposure = -1;       // exposure - in terms of kton*yrs
+double          gOptSecExposure = -1;          // exposure - in terms of seconds
 double          gOptEvMin;                     // minimum neutrino energy
 double          gOptEvMax;                     // maximum neutrino energy
 string          gOptEvFilePrefix;              // event file prefix
@@ -541,6 +544,22 @@ void GetCommandLineArgs(int argc, char ** argv)
     gOptKtonYrExposure = parser.ArgAsDouble('e');
     have_required_statistics = true;
   }//-e?
+
+  if (parser.OptionExists('T')) {
+    if (have_required_statistics) {
+      LOG("gevgen_atmo", pFATAL) 
+         << "Can't request exposure both in terms of number of events or kton*yrs and time"
+         << "\nUse just one of the -n, -e, or -T options";
+      PrintSyntax();
+      gAbortingInErr = true;
+      exit(1);
+    }
+    LOG("gevgen_atmo", pDEBUG) 
+        << "Reading requested exposure in seconds";
+    gOptSecExposure = parser.ArgAsDouble('T');
+    have_required_statistics = true;
+  }
+
   if(!have_required_statistics) {
     LOG("gevgen_atmo", pFATAL) 
        << "You must request exposure either in terms of number of events and  kton*yrs"
