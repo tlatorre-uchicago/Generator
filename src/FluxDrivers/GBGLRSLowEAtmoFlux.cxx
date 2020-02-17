@@ -25,7 +25,7 @@
 #include "Conventions/Constants.h"
 
 #include "FluxDrivers/GFluxDriverFactory.h"
-FLUXDRIVERREG4(genie,flux,GBGLRSAtmoFlux,genie::flux::GBGLRSAtmoFlux)
+FLUXDRIVERREG4(genie,flux,GBGLRSLowEAtmoFlux,genie::flux::GBGLRSLowEAtmoFlux)
 
 using std::ifstream;
 using std::ios;
@@ -34,7 +34,7 @@ using namespace genie;
 using namespace genie::flux;
 using namespace genie::constants;
 
-GBGLRSAtmoFlux::GBGLRSAtmoFlux() :
+GBGLRSLowEAtmoFlux::GBGLRSLowEAtmoFlux() :
 GAtmoFlux()
 {
   LOG("Flux", pNOTICE)
@@ -44,7 +44,7 @@ GAtmoFlux()
   this->SetBinSizes();
 }
 
-GBGLRSAtmoFlux::~GBGLRSAtmoFlux()
+GBGLRSLowEAtmoFlux::~GBGLRSLowEAtmoFlux()
 {
 
 }
@@ -53,7 +53,7 @@ GBGLRSAtmoFlux::~GBGLRSAtmoFlux()
  *
  * The cos(theta) bins are equivalent to np.linspace(-1,1,21) and the energy
  * bins are equivalent to np.logspace(-2,1,61). */
-void GBGLRSAtmoFlux::SetBinSizes(void)
+void GBGLRSLowEAtmoFlux::SetBinSizes(void)
 {
   unsigned int i;
   double costheta, logE, dcostheta, logEmin, dlogE;
@@ -99,8 +99,8 @@ void GBGLRSAtmoFlux::SetBinSizes(void)
          << ": lower edge = " << fEnergyBins[i];
     } else {
       LOG("Flux", pDEBUG)
-         << "FLUKA 3d flux: Energy bin " << kBGLRSLowE3DNumLogEvBinsLow+kBGLRSLowE3DNumLogEvBinsHigh
-         << ": upper edge = " << fEnergyBins[kBGLRSLowE3DNumLogEvBinsLow+kBGLRSLowE3DNumLogEvBinsHigh];
+         << "FLUKA 3d flux: Energy bin " << kBGLRSLowE3DNumLogEvBins
+         << ": upper edge = " << fEnergyBins[kBGLRSLowE3DNumLogEvBins];
     }
   }
 
@@ -110,7 +110,7 @@ void GBGLRSAtmoFlux::SetBinSizes(void)
   fMaxEv = fEnergyBins[fNumEnergyBins];
 }
 
-bool GBGLRSAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
+bool GBGLRSLowEAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
 {
   unsigned int i;
   int ibin;

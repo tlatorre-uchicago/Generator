@@ -251,6 +251,7 @@
 #ifdef __GENIE_FLUX_DRIVERS_ENABLED__
 #include "FluxDrivers/GFLUKAAtmoFlux.h"
 #include "FluxDrivers/GBGLRSAtmoFlux.h"
+#include "FluxDrivers/GBGLRSLowEAtmoFlux.h"
 #include "FluxDrivers/GHAKKMAtmoFlux.h"
 #endif
 

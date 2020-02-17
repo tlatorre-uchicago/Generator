@@ -43,11 +43,11 @@ const unsigned int kBGLRSLowE3DNumLogEvBins              = 60;
 const unsigned int kBGLRSLowE3DNumLogEvBinsPerDecade     = 20;
 const double       kBGLRSLowE3DEvMin                     = 0.01; // GeV
 
-class GBGLRSAtmoFlux: public GAtmoFlux {
+class GBGLRSLowEAtmoFlux: public GAtmoFlux {
 
 public :
-  GBGLRSAtmoFlux();
- ~GBGLRSAtmoFlux();
+  GBGLRSLowEAtmoFlux();
+ ~GBGLRSLowEAtmoFlux();
 
   //     
   // Most implementation is derived from the base GAtmoFlux
