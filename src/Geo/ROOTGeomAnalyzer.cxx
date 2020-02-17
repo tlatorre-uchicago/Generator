@@ -1178,19 +1178,6 @@ void ROOTGeomAnalyzer::MaxPathLengthsBoxMethod(void)
 
 }
 
-/* Returns the bounding box origin and half-lengths in meters. */
-void ROOTGeomAnalyzer::GetBoundingBox(TVector3 *o, TVector3 *dx)
-{
-    TGeoShape * TS  = fTopVolume->GetShape();
-    TGeoBBox *  box = (TGeoBBox *)TS;
-    dx->SetX(box->GetDX()*fLengthScale);
-    dx->SetY(box->GetDY()*fLengthScale);
-    dx->SetZ(box->GetDZ()*fLengthScale);
-    o->SetX((box->GetOrigin())[0]*fLengthScale);
-    o->SetY((box->GetOrigin())[1]*fLengthScale);
-    o->SetZ((box->GetOrigin())[2]*fLengthScale);
-}
-    
 //___________________________________________________________________________
 bool ROOTGeomAnalyzer::GenBoxRay(int indx, TLorentzVector& x4, TLorentzVector& p4)
 {

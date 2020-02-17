@@ -227,6 +227,9 @@
 #include <iomanip>
 
 #include <TRotation.h>
+#include <TMath.h>
+#include <TGeoShape.h>
+#include <TGeoBBox.h>
 
 #include "Conventions/Units.h"
 #include "EVGCore/EventRecord.h"
@@ -329,12 +332,12 @@ int main(int argc, char** argv)
   GeomAnalyzerI * geom_driver = GetGeometry();
 
   if (gOptRT < 0) {
-    LOG("gevgen_atmo", pINFO) << "Warning! Flux surface transverse radius not specified so using default value of 10 meters!";
+    LOG("gevgen_atmo", pWARN) << "Warning! Flux surface transverse radius not specified so using default value of 10 meters!";
     gOptRT = 10;
   }
 
   if (gOptRL < 0) {
-    LOG("gevgen_atmo", pINFO) << "Warning! Flux surface longitudinal radius not specified so using default value of 10 meters!";
+    LOG("gevgen_atmo", pWARN) << "Warning! Flux surface longitudinal radius not specified so using default value of 10 meters!";
     gOptRL = 10;
   }
 
@@ -439,16 +442,16 @@ GeomAnalyzerI* GetGeometry(void)
 
     /* If flux generation surface isn't defined, get the bounding box for the
      * geometry and set something appropriate. */
-    TGeoShape * bounding_box = topvol->GetShape();
-    TGeoBBox *  box = (TGeoBBox *)TS;
-    dx = box->GetDX()*rgeom->LengthUnits();
-    dy = box->GetDY()*rgeom->LengthUnits();
-    dz = box->GetDZ()*rgeom->LengthUnits();
+    TGeoShape *bounding_box = topvol->GetShape();
+    TGeoBBox *box = (TGeoBBox *) bounding_box;
+    double dx = box->GetDX()*rgeom->LengthUnits();
+    double dy = box->GetDY()*rgeom->LengthUnits();
+    double dz = box->GetDZ()*rgeom->LengthUnits();
 
     if (gOptRL < 0 && gOptRT < 0) {
-      gOptRL = sqrt(dx*dx + dy*dy + dz*dz);
+      gOptRL = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
       gOptRT = gOptRL;
-      LOG("gevgen_atmo", pINFO) << "Setting flux longitudinal and transverse radius to " << setprecision(2) << gOptRL << " meters based on bounding box of ROOT geometry.";
+      LOG("gevgen_atmo", pNOTICE) << "Setting flux longitudinal and transverse radius to " << setprecision(2) << gOptRL << " meters based on bounding box of ROOT geometry.";
     }
 
     // switch on/off volumes as requested

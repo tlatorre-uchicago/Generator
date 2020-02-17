@@ -127,7 +127,6 @@ protected:
   virtual void   MaxPathLengthsFluxMethod(void);
   virtual void   MaxPathLengthsBoxMethod (void);
   virtual bool   GenBoxRay               (int indx, TLorentzVector& x4, TLorentzVector& p4);
-  virtual void   GetBoundingBox          (TVector3 *o, TVector3 *dx)
 
   virtual double ComputePathLengthPDG    (const TVector3 & r, const TVector3 & udir, int pdgc);
   virtual void   SwimOnce                (const TVector3 & r, const TVector3 & udir);
