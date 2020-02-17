@@ -334,6 +334,10 @@ int main(int argc, char** argv)
   mcj_driver->UseGeomAnalyzer(geom_driver);
   mcj_driver->Configure();
   mcj_driver->UseSplines();
+  /* Note: For the method of calculating the total number of events using a
+   * livetime we *need* to force a single probability scale. So if you change
+   * the next line you need to make sure that the user didn't specify the -T
+   * option. */
   mcj_driver->ForceSingleProbScale();
 
   // initialize an ntuple writer

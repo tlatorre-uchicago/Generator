@@ -7,10 +7,7 @@
  Author: Anthony LaTorre <tlatorre at uchicago dot edu>
          University of Chicago
 
- based on GBGLRSAtmoFlux.cxx by 
-
- Author: Christopher Backhouse <c.backhouse1@physics.ox.ac.uk>
-         Oxford University
+ based on GBGLRSAtmoFlux.cxx by Christopher Backhouse.
 */
 //____________________________________________________________________________
 
@@ -29,6 +26,8 @@ FLUXDRIVERREG4(genie,flux,GBGLRSLowEAtmoFlux,genie::flux::GBGLRSLowEAtmoFlux)
 
 using std::ifstream;
 using std::ios;
+using std::string;
+using std::istringstream;
 
 using namespace genie;
 using namespace genie::flux;
@@ -46,7 +45,9 @@ GAtmoFlux()
 
 GBGLRSLowEAtmoFlux::~GBGLRSLowEAtmoFlux()
 {
-
+  if (fPhiBins) delete fPhiBins;
+  if (fCosThetaBins) delete fCosThetaBins;
+  if (fEnergyBins) delete fEnergyBins;
 }
 
 /* Generate the correct cos(theta) and energy bin sizes.
@@ -56,9 +57,11 @@ GBGLRSLowEAtmoFlux::~GBGLRSLowEAtmoFlux()
 void GBGLRSLowEAtmoFlux::SetBinSizes(void)
 {
   unsigned int i;
-  double costheta, logE, dcostheta, logEmin, dlogE;
+  double logE, dcostheta, logEmin, dlogE;
 
-  costheta = kBGLRSLowE3DCosThetaMin;
+  if (fPhiBins) delete fPhiBins;
+  if (fCosThetaBins) delete fCosThetaBins;
+  if (fEnergyBins) delete fEnergyBins;
 
   fPhiBins       = new double [2];
   fCosThetaBins  = new double [kBGLRSLowE3DNumCosThetaBins + 1];
@@ -72,18 +75,17 @@ void GBGLRSLowEAtmoFlux::SetBinSizes(void)
   logEmin = TMath::Log10(kBGLRSLowE3DEvMin);
   dlogE = 1.0/(double) kBGLRSLowE3DNumLogEvBinsPerDecade;
 
-  costheta = kBGLRSLowE3DCosThetaMin;
+  fCosThetaBins[0] = kBGLRSLowE3DCosThetaMin;
   for (i = 0; i <= kBGLRSLowE3DNumCosThetaBins; i++) {
     if (i > 0)
-      costheta += dcostheta;
-    fCosThetaBins[i] = costheta;
+      fCosThetaBins[i] = fCosThetaBins[i-1] + dcostheta;
     if (i != kBGLRSLowE3DNumCosThetaBins) {
       LOG("Flux", pDEBUG)
-        << "FLUKA 3d flux: CosTheta bin " << i+1
+        << "BGLRSLowE 3d flux: CosTheta bin " << i+1
         << ": lower edge = " << fCosThetaBins[i];
     } else {
       LOG("Flux", pDEBUG)
-        << "FLUKA 3d flux: CosTheta bin " << kBGLRSLowE3DNumCosThetaBins
+        << "BGLRSLowE 3d flux: CosTheta bin " << kBGLRSLowE3DNumCosThetaBins
         << ": upper edge = " << fCosThetaBins[kBGLRSLowE3DNumCosThetaBins];
     }
   }
@@ -95,11 +97,11 @@ void GBGLRSLowEAtmoFlux::SetBinSizes(void)
     fEnergyBins[i] = TMath::Power(10.0, logE);
     if (i != kBGLRSLowE3DNumLogEvBins) {
       LOG("Flux", pDEBUG)
-         << "FLUKA 3d flux: Energy bin " << i+1
+         << "BGLRSLowE 3d flux: Energy bin " << i+1
          << ": lower edge = " << fEnergyBins[i];
     } else {
       LOG("Flux", pDEBUG)
-         << "FLUKA 3d flux: Energy bin " << kBGLRSLowE3DNumLogEvBins
+         << "BGLRSLowE 3d flux: Energy bin " << kBGLRSLowE3DNumLogEvBins
          << ": upper edge = " << fEnergyBins[kBGLRSLowE3DNumLogEvBins];
     }
   }
@@ -115,13 +117,13 @@ bool GBGLRSLowEAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
   unsigned int i;
   int ibin;
   double energy, costheta, flux;
-  double junkd; // throw away 4th column
+  string str;
+  TH3D* histo;
 
   LOG("Flux", pNOTICE) 
     << "Loading BGLRS low energy flux for neutrino: " << nu_pdg 
     << " from file: " << filename;
 
-  TH3D* histo = 0;
   std::map<int,TH3D*>::iterator myMapEntry = fRawFluxHistoMap.find(nu_pdg);
   if (myMapEntry != fRawFluxHistoMap.end()){
       histo = myMapEntry->second;
@@ -134,29 +136,35 @@ bool GBGLRSLowEAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
 
   ifstream flux_stream(filename.c_str(), ios::in);
 
-  if (!flux_stream) {
-     LOG("Flux", pERROR) << "Could not open file: " << filename;
+  if (!flux_stream || !flux_stream.good()) {
+     LOG("Flux", pERROR) << "Error opening file: " << filename;
      return false;
   }
 
-  // throw away comment line
-  flux_stream.ignore(99999, '\n');
-
   i = 0;
-  while (!flux_stream.eof()) {
+  while (getline(flux_stream,str)) {
     i += 1;
 
+    /* Skip comments. */
+    if (str.length() > 0 && str.at(0) == '#') continue;
+
+    /* Loop over each line and parse the energy, cos(theta), and flux.
+     *
+     * See https://stackoverflow.com/questions/21334173/read-from-file-in-c-till-end-of-line. */
+    istringstream ss(str);
+
     flux = 0.0;
-    flux_stream >> energy >> costheta >> flux >> junkd;
+    ss >> energy >> costheta >> flux;
     if (flux > 0) {
       LOG("Flux", pINFO)
         << "Flux[Ev = " << energy 
-        << ", cos8 = " << costheta << "] = " << flux;
+        << ", cos = " << costheta << "] = " << flux;
       ibin = histo->FindBin((Axis_t) energy, (Axis_t) costheta, (Axis_t) kPi);
       histo->SetBinContent(ibin, (Stat_t)(flux));
     } else {
       LOG("Flux", pERROR) << "Flux on line " << i << " is " << flux << " which is negative!";
     }
   }
+
   return true;
 }
