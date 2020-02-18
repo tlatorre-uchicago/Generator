@@ -80,11 +80,11 @@ void GBGLRSPlusFLUKAAtmoFlux::SetBinSizes(void)
     if (i > 0)
       fCosThetaBins[i] = fCosThetaBins[i-1] + dcostheta;
     if (i != kBGLRSPlusFLUKA3DNumCosThetaBins) {
-      LOG("Flux", pDEBUG)
+      LOG("Flux", pNOTICE)
         << "BGLRSPlusFLUKA 3d flux: CosTheta bin " << i+1
         << ": lower edge = " << fCosThetaBins[i];
     } else {
-      LOG("Flux", pDEBUG)
+      LOG("Flux", pNOTICE)
         << "BGLRSPlusFLUKA 3d flux: CosTheta bin " << kBGLRSPlusFLUKA3DNumCosThetaBins
         << ": upper edge = " << fCosThetaBins[kBGLRSPlusFLUKA3DNumCosThetaBins];
     }
@@ -96,11 +96,11 @@ void GBGLRSPlusFLUKAAtmoFlux::SetBinSizes(void)
       logE += dlogE;
     fEnergyBins[i] = TMath::Power(10.0, logE);
     if (i != kBGLRSPlusFLUKA3DNumLogEvBins) {
-      LOG("Flux", pDEBUG)
+      LOG("Flux", pNOTICE)
          << "BGLRSPlusFLUKA 3d flux: Energy bin " << i+1
          << ": lower edge = " << fEnergyBins[i];
     } else {
-      LOG("Flux", pDEBUG)
+      LOG("Flux", pNOTICE)
          << "BGLRSPlusFLUKA 3d flux: Energy bin " << kBGLRSPlusFLUKA3DNumLogEvBins
          << ": upper edge = " << fEnergyBins[kBGLRSPlusFLUKA3DNumLogEvBins];
     }

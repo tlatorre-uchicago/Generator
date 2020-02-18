@@ -523,7 +523,13 @@ GAtmoFlux* GetFlux(void)
     string filename   = file_iter->second;
     atmo_flux_driver->AddFluxFile(neutrino_code, filename);
   }
-  atmo_flux_driver->LoadFluxData();
+
+  if (!atmo_flux_driver->LoadFluxData()) {
+    LOG("gevgen_atmo", pFATAL) << "Error loading flux data. Quitting...";
+    gAbortingInErr = true;
+    exit(1);
+  }
+
   // configure flux generation surface:
   atmo_flux_driver->SetRadii(gOptRL, gOptRT);
   // set rotation for coordinate tranformation from the topocentric horizontal
