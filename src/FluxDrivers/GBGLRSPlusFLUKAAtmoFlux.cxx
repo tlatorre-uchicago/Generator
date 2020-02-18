@@ -37,7 +37,7 @@ GBGLRSPlusFLUKAAtmoFlux::GBGLRSPlusFLUKAAtmoFlux() :
 GAtmoFlux()
 {
   LOG("Flux", pNOTICE)
-     << "Instantiating the GENIE BGLRS + low energy atmospheric neutrino flux driver";
+     << "Instantiating the GENIE BGLRS + FLUKA atmospheric neutrino flux driver";
 
   this->Initialize();
   this->SetBinSizes();
