@@ -485,13 +485,13 @@ bool GAtmoFlux::LoadFluxData(void)
     // and fill the histogram
     bool loaded = this->FillFluxHisto(nu_pdg, filename);
 
+    loading_status = loading_status && loaded;
+
     if (!loaded) {
         LOG("Flux", pERROR)
-          << "Error loading atmospheric neutrino flux simulation data from " << pname;
-        break;
+          << "Error loading atmospheric neutrino flux simulation data from " << filename;
+        goto err;
     }
-
-    loading_status = loading_status && loaded;
   }
 
   if(loading_status) {
@@ -510,6 +510,8 @@ bool GAtmoFlux::LoadFluxData(void)
     this->AddAllFluxes();
     return true;
   }
+
+err:
 
   LOG("Flux", pERROR)
     << "Error loading atmospheric neutrino flux simulation data";
