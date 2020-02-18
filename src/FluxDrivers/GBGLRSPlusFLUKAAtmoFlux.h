@@ -1,7 +1,7 @@
 //____________________________________________________________________________
 /*!
 
-\class   genie::flux::GBGLRSLowEAtmoFlux
+\class   genie::flux::GBGLRSPlusFLUKAAtmoFlux
 
 \brief   A flux driver for a combined version of the Bartol Atmospheric
          Neutrino Flux and the Battistoni flux at low energies.
@@ -26,8 +26,8 @@ based heavily on GBGLRSAtmoFlux by Christopher Backhouse.
 */
 //____________________________________________________________________________
 
-#ifndef _GENIE_BGLRS_LOWE_ATMO_FLUX_H_
-#define _GENIE_BGLRS_LOWE_ATMO_FLUX_H_
+#ifndef _GENIE_BGLRS_PLUS_FLUKA_ATMO_FLUX_H_
+#define _GENIE_BGLRS_PLUS_FLUKA_ATMO_FLUX_H_
 
 #include "FluxDrivers/GAtmoFlux.h"
 
@@ -35,19 +35,19 @@ namespace genie {
 namespace flux  {
 
 // Number of cos(zenith) and energy bins in flux simulation
-const unsigned int kBGLRSLowE3DNumCosThetaBins           = 20;
-const double       kBGLRSLowE3DCosThetaMin               = -1.0;
-const double       kBGLRSLowE3DCosThetaMax               =  1.0;
+const unsigned int kBGLRSPlusFLUKA3DNumCosThetaBins           = 20;
+const double       kBGLRSPlusFLUKA3DCosThetaMin               = -1.0;
+const double       kBGLRSPlusFLUKA3DCosThetaMax               =  1.0;
 /* Energy bins are equivalent to np.logspace(-2,1,61). */
-const unsigned int kBGLRSLowE3DNumLogEvBins              = 60;
-const unsigned int kBGLRSLowE3DNumLogEvBinsPerDecade     = 20;
-const double       kBGLRSLowE3DEvMin                     = 0.01; // GeV
+const unsigned int kBGLRSPlusFLUKA3DNumLogEvBins              = 60;
+const unsigned int kBGLRSPlusFLUKA3DNumLogEvBinsPerDecade     = 20;
+const double       kBGLRSPlusFLUKA3DEvMin                     = 0.01; // GeV
 
-class GBGLRSLowEAtmoFlux: public GAtmoFlux {
+class GBGLRSPlusFLUKAAtmoFlux: public GAtmoFlux {
 
 public :
-  GBGLRSLowEAtmoFlux();
- ~GBGLRSLowEAtmoFlux();
+  GBGLRSPlusFLUKAAtmoFlux();
+ ~GBGLRSPlusFLUKAAtmoFlux();
 
   // Most implementation is derived from the base GAtmoFlux
   // The concrete driver is only required to implement a function for

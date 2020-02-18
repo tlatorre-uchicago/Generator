@@ -254,7 +254,7 @@
 #ifdef __GENIE_FLUX_DRIVERS_ENABLED__
 #include "FluxDrivers/GFLUKAAtmoFlux.h"
 #include "FluxDrivers/GBGLRSAtmoFlux.h"
-#include "FluxDrivers/GBGLRSLowEAtmoFlux.h"
+#include "FluxDrivers/GBGLRSPlusFLUKAAtmoFlux.h"
 #include "FluxDrivers/GHAKKMAtmoFlux.h"
 #endif
 
@@ -500,8 +500,8 @@ GAtmoFlux* GetFlux(void)
      GBGLRSAtmoFlux * bartol_flux = new GBGLRSAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
   } else 
-  if(gOptFluxSim == "BGLRSLOWE") {
-     GBGLRSLowEAtmoFlux * bartol_flux = new GBGLRSLowEAtmoFlux;
+  if(gOptFluxSim == "BGLRS+FLUKA") {
+     GBGLRSPlusFLUKAAtmoFlux * bartol_flux = new GBGLRSPlusFLUKAAtmoFlux;
      atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
   } else
   if(gOptFluxSim == "HAKKM") {
@@ -689,10 +689,10 @@ void GetCommandLineArgs(int argc, char ** argv)
     }
     if((gOptFluxSim != "FLUKA") && 
        (gOptFluxSim != "BGLRS") && 
-       (gOptFluxSim != "BGLRSLOWE") &&
+       (gOptFluxSim != "BGLRS+FLUKA") &&
        (gOptFluxSim != "HAKKM")) {
         LOG("gevgen_atmo", pFATAL) 
-             << "The flux file source needs to be one of <FLUKA,BGLRS,BGLRSLOWE,HAKKM>";
+             << "The flux file source needs to be one of <FLUKA,BGLRS,BGLRS+FLUKA,HAKKM>";
         PrintSyntax();
         gAbortingInErr = true;
         exit(1);

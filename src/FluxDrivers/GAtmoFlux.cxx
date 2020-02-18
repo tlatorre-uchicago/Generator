@@ -662,6 +662,7 @@ double GAtmoFlux::GetTotalFlux(void)
     TH3D *h = rawiter->second;
     if (h) {
       flux += h->Integral("width");
+      LOG("Flux", pERROR) << "Total flux for " << rawiter->first << " equals " << h->Integral("width") << ".";
     }
   }
 

@@ -17,12 +17,12 @@
 #include <TH3D.h>
 #include <TMath.h>
 
-#include "FluxDrivers/GBGLRSLowEAtmoFlux.h"
+#include "FluxDrivers/GBGLRSPlusFLUKAAtmoFlux.h"
 #include "Messenger/Messenger.h"
 #include "Conventions/Constants.h"
 
 #include "FluxDrivers/GFluxDriverFactory.h"
-FLUXDRIVERREG4(genie,flux,GBGLRSLowEAtmoFlux,genie::flux::GBGLRSLowEAtmoFlux)
+FLUXDRIVERREG4(genie,flux,GBGLRSPlusFLUKAAtmoFlux,genie::flux::GBGLRSPlusFLUKAAtmoFlux)
 
 using std::ifstream;
 using std::ios;
@@ -33,7 +33,7 @@ using namespace genie;
 using namespace genie::flux;
 using namespace genie::constants;
 
-GBGLRSLowEAtmoFlux::GBGLRSLowEAtmoFlux() :
+GBGLRSPlusFLUKAAtmoFlux::GBGLRSPlusFLUKAAtmoFlux() :
 GAtmoFlux()
 {
   LOG("Flux", pNOTICE)
@@ -43,7 +43,7 @@ GAtmoFlux()
   this->SetBinSizes();
 }
 
-GBGLRSLowEAtmoFlux::~GBGLRSLowEAtmoFlux()
+GBGLRSPlusFLUKAAtmoFlux::~GBGLRSPlusFLUKAAtmoFlux()
 {
   if (fPhiBins) delete fPhiBins;
   if (fCosThetaBins) delete fCosThetaBins;
@@ -54,7 +54,7 @@ GBGLRSLowEAtmoFlux::~GBGLRSLowEAtmoFlux()
  *
  * The cos(theta) bins are equivalent to np.linspace(-1,1,21) and the energy
  * bins are equivalent to np.logspace(-2,1,61). */
-void GBGLRSLowEAtmoFlux::SetBinSizes(void)
+void GBGLRSPlusFLUKAAtmoFlux::SetBinSizes(void)
 {
   unsigned int i;
   double logE, dcostheta, logEmin, dlogE;
@@ -64,55 +64,55 @@ void GBGLRSLowEAtmoFlux::SetBinSizes(void)
   if (fEnergyBins) delete fEnergyBins;
 
   fPhiBins       = new double [2];
-  fCosThetaBins  = new double [kBGLRSLowE3DNumCosThetaBins + 1];
-  fEnergyBins    = new double [kBGLRSLowE3DNumLogEvBins + 1];
+  fCosThetaBins  = new double [kBGLRSPlusFLUKA3DNumCosThetaBins + 1];
+  fEnergyBins    = new double [kBGLRSPlusFLUKA3DNumLogEvBins + 1];
 
   fPhiBins[0] = 0;
   fPhiBins[1] = 2.*kPi;
 
-  dcostheta = (kBGLRSLowE3DCosThetaMax - kBGLRSLowE3DCosThetaMin)/(double) kBGLRSLowE3DNumCosThetaBins;
+  dcostheta = (kBGLRSPlusFLUKA3DCosThetaMax - kBGLRSPlusFLUKA3DCosThetaMin)/(double) kBGLRSPlusFLUKA3DNumCosThetaBins;
 
-  logEmin = TMath::Log10(kBGLRSLowE3DEvMin);
-  dlogE = 1.0/(double) kBGLRSLowE3DNumLogEvBinsPerDecade;
+  logEmin = TMath::Log10(kBGLRSPlusFLUKA3DEvMin);
+  dlogE = 1.0/(double) kBGLRSPlusFLUKA3DNumLogEvBinsPerDecade;
 
-  fCosThetaBins[0] = kBGLRSLowE3DCosThetaMin;
-  for (i = 0; i <= kBGLRSLowE3DNumCosThetaBins; i++) {
+  fCosThetaBins[0] = kBGLRSPlusFLUKA3DCosThetaMin;
+  for (i = 0; i <= kBGLRSPlusFLUKA3DNumCosThetaBins; i++) {
     if (i > 0)
       fCosThetaBins[i] = fCosThetaBins[i-1] + dcostheta;
-    if (i != kBGLRSLowE3DNumCosThetaBins) {
+    if (i != kBGLRSPlusFLUKA3DNumCosThetaBins) {
       LOG("Flux", pDEBUG)
-        << "BGLRSLowE 3d flux: CosTheta bin " << i+1
+        << "BGLRSPlusFLUKA 3d flux: CosTheta bin " << i+1
         << ": lower edge = " << fCosThetaBins[i];
     } else {
       LOG("Flux", pDEBUG)
-        << "BGLRSLowE 3d flux: CosTheta bin " << kBGLRSLowE3DNumCosThetaBins
-        << ": upper edge = " << fCosThetaBins[kBGLRSLowE3DNumCosThetaBins];
+        << "BGLRSPlusFLUKA 3d flux: CosTheta bin " << kBGLRSPlusFLUKA3DNumCosThetaBins
+        << ": upper edge = " << fCosThetaBins[kBGLRSPlusFLUKA3DNumCosThetaBins];
     }
   }
 
   logE = logEmin;
-  for (i = 0; i <= kBGLRSLowE3DNumLogEvBins; i++) {
+  for (i = 0; i <= kBGLRSPlusFLUKA3DNumLogEvBins; i++) {
     if (i > 0)
       logE += dlogE;
     fEnergyBins[i] = TMath::Power(10.0, logE);
-    if (i != kBGLRSLowE3DNumLogEvBins) {
+    if (i != kBGLRSPlusFLUKA3DNumLogEvBins) {
       LOG("Flux", pDEBUG)
-         << "BGLRSLowE 3d flux: Energy bin " << i+1
+         << "BGLRSPlusFLUKA 3d flux: Energy bin " << i+1
          << ": lower edge = " << fEnergyBins[i];
     } else {
       LOG("Flux", pDEBUG)
-         << "BGLRSLowE 3d flux: Energy bin " << kBGLRSLowE3DNumLogEvBins
-         << ": upper edge = " << fEnergyBins[kBGLRSLowE3DNumLogEvBins];
+         << "BGLRSPlusFLUKA 3d flux: Energy bin " << kBGLRSPlusFLUKA3DNumLogEvBins
+         << ": upper edge = " << fEnergyBins[kBGLRSPlusFLUKA3DNumLogEvBins];
     }
   }
 
   fNumPhiBins      = 1;
-  fNumCosThetaBins = kBGLRSLowE3DNumCosThetaBins;
-  fNumEnergyBins   = kBGLRSLowE3DNumLogEvBins;
+  fNumCosThetaBins = kBGLRSPlusFLUKA3DNumCosThetaBins;
+  fNumEnergyBins   = kBGLRSPlusFLUKA3DNumLogEvBins;
   fMaxEv = fEnergyBins[fNumEnergyBins];
 }
 
-bool GBGLRSLowEAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
+bool GBGLRSPlusFLUKAAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
 {
   unsigned int i;
   int ibin;
@@ -156,7 +156,7 @@ bool GBGLRSLowEAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
     flux = 0.0;
     ss >> energy >> costheta >> flux;
     if (flux > 0) {
-      LOG("Flux", pINFO)
+      LOG("Flux", pNOTICE)
         << "Flux[Ev = " << energy
         << ", cos = " << costheta << "] = " << flux;
       ibin = histo->FindBin((Axis_t) energy, (Axis_t) costheta, (Axis_t) kPi);
