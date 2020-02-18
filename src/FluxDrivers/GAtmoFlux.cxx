@@ -462,6 +462,8 @@ bool GAtmoFlux::LoadFluxData(void)
   fFluxHistoMap.clear();
   fPdgCList->clear();
 
+  bool loading_status = true;
+
   for( unsigned int n=0; n<fFluxFlavour.size(); n++ ){
     int nu_pdg      = fFluxFlavour.at(n);
     string filename = fFluxFile.at(n);
@@ -480,29 +482,31 @@ bool GAtmoFlux::LoadFluxData(void)
     // and fill the histogram
     bool loaded = this->FillFluxHisto(nu_pdg, filename);
 
+    loading_status = loading_status && loaded;
+
     if (!loaded) {
         LOG("Flux", pERROR)
           << "Error loading atmospheric neutrino flux simulation data from " << filename;
-        goto err;
+        break;
     }
   }
 
-  map<int,TH3D*>::iterator hist_iter = fRawFluxHistoMap.begin();
-  for ( ; hist_iter != fRawFluxHistoMap.end(); ++hist_iter) {
-    int   nu_pdg = hist_iter->first;
-    TH3D* hist   = hist_iter->second;
+  if(loading_status) {
+    map<int,TH3D*>::iterator hist_iter = fRawFluxHistoMap.begin();
+    for ( ; hist_iter != fRawFluxHistoMap.end(); ++hist_iter) {
+      int   nu_pdg = hist_iter->first;
+      TH3D* hist   = hist_iter->second;
 
-    TH3D* hnorm = this->CreateNormalisedFluxHisto( hist );
-    fFluxHistoMap.insert( map<int,TH3D*>::value_type(nu_pdg,hnorm) );
-    fPdgCList->push_back(nu_pdg);
+      TH3D* hnorm = this->CreateNormalisedFluxHisto( hist );
+      fFluxHistoMap.insert( map<int,TH3D*>::value_type(nu_pdg,hnorm) );
+      fPdgCList->push_back(nu_pdg);
+    }
+
+    LOG("Flux", pNOTICE)
+          << "Atmospheric neutrino flux simulation data loaded!";
+    this->AddAllFluxes();
+    return true;
   }
-
-  LOG("Flux", pNOTICE)
-        << "Atmospheric neutrino flux simulation data loaded!";
-  this->AddAllFluxes();
-  return true;
-
-err:
 
   LOG("Flux", pERROR)
     << "Error loading atmospheric neutrino flux simulation data";
