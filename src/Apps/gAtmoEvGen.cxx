@@ -352,9 +352,6 @@ int main(int argc, char** argv)
     LOG("gevgen_atmo", pWARN) << "Warning! Flux surface longitudinal radius not specified so using default value of " << gOptRL << " meters!";
   }
 
-  // get flux driver
-  atmo_flux_driver = GetFlux();
-
   // create the GENIE monte carlo job driver
   GMCJDriver* mcj_driver = new GMCJDriver;
   mcj_driver->SetEventGeneratorList(RunOpt::Instance()->EventGeneratorList());
