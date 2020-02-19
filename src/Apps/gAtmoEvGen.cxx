@@ -237,9 +237,9 @@
 #include <sstream>
 #include <map>
 #include <iomanip>
+#include <cmath>
 
 #include <TRotation.h>
-#include <TMath.h>
 
 #include "Framework/Conventions/Units.h"
 #include "Framework/EventGen/EventRecord.h"
