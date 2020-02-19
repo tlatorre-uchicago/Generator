@@ -336,9 +336,6 @@ int main(int argc, char** argv)
   utils::app_init::RandGen(gOptRanSeed);
   utils::app_init::XSecTable(gOptInpXSecFile, true);
 
-  // get flux driver
-  GFluxI * flux_driver = GetFlux();
-
   // get geometry driver
   GeomAnalyzerI * geom_driver = GetGeometry();
 
@@ -351,6 +348,9 @@ int main(int argc, char** argv)
     gOptRL = 1000; // m
     LOG("gevgen_atmo", pWARN) << "Warning! Flux surface longitudinal radius not specified so using default value of " << gOptRL << " meters!";
   }
+
+  // get flux driver
+  GFluxI * flux_driver = GetFlux();
 
   // create the GENIE monte carlo job driver
   GMCJDriver* mcj_driver = new GMCJDriver;
