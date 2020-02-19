@@ -347,10 +347,13 @@ int main(int argc, char** argv)
   // get flux driver
   atmo_flux_driver = GetFlux();
 
+  // Cast to GFluxI, the generic flux driver interface
+  GFluxI *flux_driver = dynamic_cast<GFluxI *>(atmo_flux_driver);
+
   // create the GENIE monte carlo job driver
   GMCJDriver* mcj_driver = new GMCJDriver;
   mcj_driver->SetEventGeneratorList(RunOpt::Instance()->EventGeneratorList());
-  mcj_driver->UseFluxDriver(dynamic_cast<GFluxI *>(atmo_flux_driver));
+  mcj_driver->UseFluxDriver(flux_driver);
   mcj_driver->UseGeomAnalyzer(geom_driver);
   mcj_driver->Configure();
   mcj_driver->UseSplines();
@@ -518,8 +521,6 @@ GAtmoFlux* GetFlux(void)
   if(!gOptRot.IsIdentity()) {
      atmo_flux_driver->SetUserCoordSystem(gOptRot);
   }
-  // Cast to GFluxI, the generic flux driver interface
-  flux_driver = dynamic_cast<GFluxI *>(atmo_flux_driver);
 
 #else
   LOG("gevgen_atmo", pFATAL) << "You need to enable the GENIE flux drivers first!";
