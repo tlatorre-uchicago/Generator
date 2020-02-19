@@ -283,7 +283,7 @@ using namespace genie::flux;
 
 void            GetCommandLineArgs (int argc, char ** argv);
 void            PrintSyntax        (void);
-GAtmoFlux*      GetFlux            (void);
+GFluxI*         GetFlux            (void);
 GeomAnalyzerI * GetGeometry        (void);
 
 // User-specified options:
