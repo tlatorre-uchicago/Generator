@@ -11,6 +11,7 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 #include <TH3D.h>
 #include <TMath.h>
