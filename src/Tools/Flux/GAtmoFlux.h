@@ -87,12 +87,17 @@ public :
   void     ForceMaxEnergy     (double emax);
   void     SetSpectralIndex   (double index);
   void     SetRadii           (double Rlongitudinal, double Rtransverse);
+  double   GetLongitudinalRadius(void);
+  double   GetTransverseRadius(void);
+
   void     SetUserCoordSystem (TRotation & rotation); ///< Rotation: Topocentric Horizontal -> User-defined Topocentric Coord System.
   void     AddFluxFile        (int neutrino_pdg, string filename);
   void     AddFluxFile        (string filename);
   bool     LoadFluxData       (void);
 
   TH3D*    GetFluxHistogram   (int flavour);
+  /* Returns the total integrated flux in units of 1/(m^2 s). */
+  double   GetTotalFlux       (void);
   double   GetFlux            (int flavour);
   double   GetFlux            (int flavour, double energy);
   double   GetFlux            (int flavour, double energy, double costh);

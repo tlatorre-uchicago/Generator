@@ -17,7 +17,8 @@
                        [-L geometry_length_units]
                        [-D geometry_density_units]
                        <-n n_of_events,
-                        -e exposure_in_kton_x_yrs >
+                        -e exposure_in_kton_x_yrs
+                        -T exposure_in_seconds >
                         -E min_energy,max_energy
                        [-o output_event_file_prefix]
                        [--flux-ray-generation-surface-distance ]
@@ -132,6 +133,8 @@
               Specifies how many events to generate.
            -e
               Specifies requested exposure in terms of kton*yrs.
+           -T
+              Specifies requested exposure in terms of seconds.
            -E
               Specifies the neutrino energy in GeV.
               Must be a comma-separated pair of numbers, eg `-E 0.3,70'
@@ -233,8 +236,10 @@
 #include <vector>
 #include <sstream>
 #include <map>
+#include <iomanip>
 
 #include <TRotation.h>
+#include <TMath.h>
 
 #include "Framework/Conventions/Units.h"
 #include "Framework/EventGen/EventRecord.h"
@@ -272,13 +277,14 @@ using std::string;
 using std::vector;
 using std::map;
 using std::ostringstream;
+using std::setprecision;
 
 using namespace genie;
 using namespace genie::flux;
 
 void            GetCommandLineArgs (int argc, char ** argv);
 void            PrintSyntax        (void);
-GFluxI *        GetFlux            (void);
+GAtmoFlux*      GetFlux            (void);
 GeomAnalyzerI * GetGeometry        (void);
 
 // User-specified options:
@@ -295,6 +301,7 @@ double          gOptGeomDUnits = 0;            // input geometry density units
 string          gOptExtMaxPlXml;               // max path lengths XML file for input geometry
 int             gOptNev = -1;                  // exposure - in terms of number of events
 double          gOptKtonYrExposure = -1;       // exposure - in terms of kton*yrs
+double          gOptSecExposure = -1;          // exposure - in terms of seconds
 double          gOptEvMin;                     // minimum neutrino energy
 double          gOptEvMax;                     // maximum neutrino energy
 string          gOptEvFilePrefix;              // event file prefix
@@ -316,6 +323,9 @@ double          kDefOptEvMax        = 50.0;    // max neutrino energy (override 
 //________________________________________________________________________________________
 int main(int argc, char** argv)
 {
+  GAtmoFlux* atmo_flux_driver;
+  double total_flux, expected_neutrinos;
+
   // Parse command line arguments
   GetCommandLineArgs(argc,argv);
 
@@ -331,19 +341,23 @@ int main(int argc, char** argv)
   utils::app_init::RandGen(gOptRanSeed);
   utils::app_init::XSecTable(gOptInpXSecFile, true);
 
-  // get flux driver
-  GFluxI * flux_driver = GetFlux();
-
   // get geometry driver
   GeomAnalyzerI * geom_driver = GetGeometry();
+
+  // get flux driver
+  atmo_flux_driver = GetFlux();
 
   // create the GENIE monte carlo job driver
   GMCJDriver* mcj_driver = new GMCJDriver;
   mcj_driver->SetEventGeneratorList(RunOpt::Instance()->EventGeneratorList());
-  mcj_driver->UseFluxDriver(flux_driver);
+  mcj_driver->UseFluxDriver(dynamic_cast<GFluxI *>(atmo_flux_driver));
   mcj_driver->UseGeomAnalyzer(geom_driver);
   mcj_driver->Configure();
   mcj_driver->UseSplines();
+  /* Note: For the method of calculating the total number of events using a
+   * livetime we *need* to force a single probability scale. So if you change
+   * the next line you need to make sure that the user didn't specify the -T
+   * option. */
   mcj_driver->ForceSingleProbScale();
 
   // initialize an ntuple writer
@@ -358,14 +372,21 @@ int main(int argc, char** argv)
   // Set GHEP print level
   GHepRecord::SetPrintLevel(RunOpt::Instance()->EventRecordPrintLevel());
 
+  total_flux = atmo_flux_driver->GetTotalFlux();
+  LOG("gevgen_atmo", pNOTICE) << "Total atmospheric neutrino flux is " << setprecision(2) << total_flux << " neutrinos per m^2 per second.";
+  if (gOptSecExposure > 0) {
+    /* Calculate the expected value of the total number of neutrinos we need to
+     * throw. We do this by multiplying the total flux by the exposure time in
+     * seconds and the area of the flux surface. */
+    expected_neutrinos = total_flux*gOptSecExposure*M_PI*pow(atmo_flux_driver->GetTransverseRadius(),2);
+    LOG("gevgen_atmo", pNOTICE) << "Simulating an exposure of " << setprecision(0) << gOptSecExposure << " seconds which corresponds to a total of " << setprecision(0) << expected_neutrinos << " neutrinos.";
+  }
+
   // event loop
-  for(int iev = 0; iev < gOptNev; iev++) {
+  for(int iev = 0; gOptNev > 0 ? iev < gOptNev : 1; iev++) {
 
     // generate next event
     EventRecord* event = mcj_driver->GenerateEvent();
-
-    // set weight (if using a weighted flux)
-    //event->SetWeight(event->Weight()*flux_driver->Weight());
 
     // print-out
     LOG("gevgen_atmo", pNOTICE) << "Generated event: " << *event;
@@ -376,6 +397,10 @@ int main(int argc, char** argv)
 
     // clean-up
     delete event;
+
+    if (gOptSecExposure && mcj_driver->NFluxNeutrinos()/mcj_driver->GlobProbScale() > expected_neutrinos) {
+      break;
+    }
   }
 
   // save the event file
@@ -383,7 +408,7 @@ int main(int argc, char** argv)
 
   // clean-up
   delete geom_driver;
-  delete flux_driver;
+  delete atmo_flux_driver;
   delete mcj_driver;
 
   return 0;
@@ -452,10 +477,8 @@ GeomAnalyzerI* GetGeometry(void)
   return geom_driver;
 }
 //________________________________________________________________________________________
-GFluxI* GetFlux(void)
+GAtmoFlux* GetFlux(void)
 {
-  GFluxI * flux_driver = 0;
-
 #ifdef __GENIE_FLUX_DRIVERS_ENABLED__
 
   // Instantiate appropriate concrete flux driver
@@ -505,7 +528,7 @@ GFluxI* GetFlux(void)
   exit(1);
 #endif
 
-  return flux_driver;
+  return atmo_flux_driver;
 }
 //________________________________________________________________________________________
 void GetCommandLineArgs(int argc, char ** argv)
@@ -563,6 +586,22 @@ void GetCommandLineArgs(int argc, char ** argv)
     gOptKtonYrExposure = parser.ArgAsDouble('e');
     have_required_statistics = true;
   }//-e?
+
+  if (parser.OptionExists('T')) {
+    if (have_required_statistics) {
+      LOG("gevgen_atmo", pFATAL)
+         << "Can't request exposure both in terms of number of events or kton*yrs and time"
+         << "\nUse just one of the -n, -e, or -T options";
+      PrintSyntax();
+      gAbortingInErr = true;
+      exit(1);
+    }
+    LOG("gevgen_atmo", pDEBUG)
+        << "Reading requested exposure in seconds";
+    gOptSecExposure = parser.ArgAsDouble('T');
+    have_required_statistics = true;
+  }
+
   if(!have_required_statistics) {
     LOG("gevgen_atmo", pFATAL)
        << "You must request exposure either in terms of number of events and  kton*yrs"
@@ -998,7 +1037,8 @@ void PrintSyntax(void)
    << "\n           [-L geometry_length_units]"
    << "\n           [-D geometry_density_units]"
    << "\n           <-n n_of_events,"
-   << "\n            -e exposure_in_kton_x_yrs>"
+   << "\n            -e exposure_in_kton_x_yrs"
+   << "\n            -T exposure_in_seconds>"
    << "\n            -E min_energy,max_energy"
    << "\n           [-o output_event_file_prefix]"
    << "\n           [--flux-ray-generation-surface-distance]"               

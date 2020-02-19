@@ -373,6 +373,17 @@ void GAtmoFlux::SetRadii(double Rlongitudinal, double Rtransverse)
   fRl = Rlongitudinal;
   fRt = Rtransverse;
 }
+
+double GAtmoFlux::GetLongitudinalRadius(void)
+{
+  return fRl;
+}
+
+double GAtmoFlux::GetTransverseRadius(void)
+{
+  return fRt;
+}
+
 //___________________________________________________________________________
 void GAtmoFlux::AddFluxFile(int nu_pdg, string filename)
 {
@@ -614,6 +625,25 @@ TH3D* GAtmoFlux::GetFluxHistogram(int flavour)
   }
   return histogram;
 }
+
+/* Returns the total integrated flux in units of 1/(m^2 s). */
+double GAtmoFlux::GetTotalFlux(void)
+{
+  double flux = 0.0;
+  map<int,TH3D*>::iterator rawiter;
+
+  rawiter = fRawFluxHistoMap.begin();
+  for (; rawiter != fRawFluxHistoMap.end(); ++rawiter) {
+    TH3D *h = rawiter->second;
+    if (h) {
+      flux += h->Integral("width");
+      LOG("Flux", pERROR) << "Total flux for " << rawiter->first << " equals " << h->Integral("width") << ".";
+    }
+  }
+
+  return flux;
+}
+
 //___________________________________________________________________________
 double GAtmoFlux::GetFlux(int flavour)
 {
