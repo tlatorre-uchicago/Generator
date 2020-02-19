@@ -373,6 +373,17 @@ void GAtmoFlux::SetRadii(double Rlongitudinal, double Rtransverse)
   fRl = Rlongitudinal;
   fRt = Rtransverse;
 }
+
+double GAtmoFlux::GetLongitudinalRadius(void)
+{
+  return fRl;
+}
+
+double GAtmoFlux::GetTransverseRadius(void)
+{
+  return fRt;
+}
+
 //___________________________________________________________________________
 void GAtmoFlux::AddFluxFile(int nu_pdg, string filename)
 {
@@ -439,16 +450,20 @@ bool GAtmoFlux::LoadFluxData(void)
     TH3D* hist = 0;
     std::map<int,TH3D*>::iterator myMapEntry = fRawFluxHistoMap.find(nu_pdg);
     if( myMapEntry == fRawFluxHistoMap.end() ){
-//      hist = myMapEntry->second;
-//      if(hist==0) {
         hist = this->CreateFluxHisto(pname.c_str(), pname.c_str());
         fRawFluxHistoMap.insert( map<int,TH3D*>::value_type(nu_pdg,hist) );
-//      }
     }
     // now let concrete instances to read the flux-specific data files
     // and fill the histogram
     bool loaded = this->FillFluxHisto(nu_pdg, filename);
+
     loading_status = loading_status && loaded;
+
+    if (!loaded) {
+        LOG("Flux", pERROR)
+          << "Error loading atmospheric neutrino flux simulation data from " << filename;
+        break;
+    }
   }
 
   if(loading_status) {
@@ -614,6 +629,25 @@ TH3D* GAtmoFlux::GetFluxHistogram(int flavour)
   }
   return histogram;
 }
+
+/* Returns the total integrated flux in units of 1/(m^2 s). */
+double GAtmoFlux::GetTotalFlux(void)
+{
+  double flux = 0.0;
+  map<int,TH3D*>::iterator rawiter;
+
+  rawiter = fRawFluxHistoMap.begin();
+  for (; rawiter != fRawFluxHistoMap.end(); ++rawiter) {
+    TH3D *h = rawiter->second;
+    if (h) {
+      flux += h->Integral("width");
+      LOG("Flux", pERROR) << "Total flux for " << rawiter->first << " equals " << h->Integral("width") << ".";
+    }
+  }
+
+  return flux;
+}
+
 //___________________________________________________________________________
 double GAtmoFlux::GetFlux(int flavour)
 {
