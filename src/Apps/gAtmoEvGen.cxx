@@ -398,7 +398,7 @@ int main(int argc, char** argv)
     // clean-up
     delete event;
 
-    if (gOptSecExposure && mcj_driver->NFluxNeutrinos()/mcj_driver->GlobProbScale() > expected_neutrinos) {
+    if (gOptSecExposure > 0 && mcj_driver->NFluxNeutrinos()/mcj_driver->GlobProbScale() > expected_neutrinos) {
       break;
     }
   }
