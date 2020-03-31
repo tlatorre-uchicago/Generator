@@ -644,6 +644,43 @@ double GAtmoFlux::GetTotalFlux(void)
   return flux;
 }
 
+/* Returns the total integrated flux in units of 1/(m^2 s). */
+double GAtmoFlux::GetTotalFlux(double emin, double emax)
+{
+  double flux = 0.0;
+  map<int,TH3D*>::iterator rawiter;
+  int e_min_bin, e_max_bin;
+
+  if (emax < emin) {
+      LOG("Flux", pFATAL) << "emax = " << emax << " is less than emin = " << emin;
+      exit(-1);
+  }
+
+  rawiter = fRawFluxHistoMap.begin();
+  for (; rawiter != fRawFluxHistoMap.end(); ++rawiter) {
+    TH3D *h = rawiter->second;
+
+    if (!h) continue;
+
+    /* Get the bin containing `emin`. */
+    e_min_bin = h->GetXaxis()->FindBin(emin);
+    e_max_bin = h->GetXaxis()->FindBin(emax);
+
+    /* First we calculate the integral within that bin from `emin` to the top
+     * edge of the bin. */
+    if (e_min_bin > 0)
+        flux += h->Integral(e_min_bin,e_min_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins())*(h->GetXaxis()->GetBinUpEdge(e_min_bin) - emin);
+    if (e_min_bin < h->GetXaxis->GetNbins())
+        flux += h->Integral(e_min_bin+1,e_max_bin-1,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")
+    if (e_max_bin <= h->GetXaxis->GetNbins())
+        flux += h->Integral(e_max_bin,e_max_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins())*(emax - h->GetXaxis()->GetBinLowEdge(e_max_bin));
+
+    LOG("Flux", pDEBUG) << "Total flux for " << rawiter->first << " equals " << h->Integral("width") << ".";
+  }
+
+  return flux;
+}
+
 //___________________________________________________________________________
 double GAtmoFlux::GetFlux(int flavour)
 {
