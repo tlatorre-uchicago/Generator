@@ -22,6 +22,7 @@
 #include "Framework/Conventions/Units.h"
 #include <stdlib.h> /* For getenv(). */
 #include "TH3D.h"
+#include "Framework/Messenger/Messenger.h"
 
 /* Macro to compute the size of a static C array.
  *
@@ -198,6 +199,10 @@ int main(int argc, char **argv)
   char err[256];
   int retval = 0;
   struct tests test;
+
+  /* Don't print low level messages so we get a nice output. */
+  Messenger * msg = Messenger::Instance();
+  msg->SetPriorityLevel("Flux", pFATAL);
 
   for (i = 0; i < LEN(tests); i++) {
     test = tests[i];
