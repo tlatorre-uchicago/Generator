@@ -682,10 +682,10 @@ double GAtmoFlux::GetTotalFlux(double emin, double emax)
           flux += h->Integral(e_min_bin,e_min_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")*(h->GetXaxis()->GetBinUpEdge(e_min_bin) - emin)/(h->GetXaxis()->GetBinUpEdge(e_min_bin)-h->GetXaxis()->GetBinLowEdge(e_min_bin));
       /* Next, we calculate the integral for all the bins between the min and
        * max bin. */
-      if (e_min_bin < h->GetXaxis->GetNbins())
+      if (e_min_bin < h->GetXaxis()->GetNbins())
           flux += h->Integral(e_min_bin+1,e_max_bin-1,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width");
       /* Finally, we calculate the integral for the last bin. */
-      if (e_max_bin <= h->GetXaxis->GetNbins())
+      if (e_max_bin <= h->GetXaxis()->GetNbins())
           flux += h->Integral(e_max_bin,e_max_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")*(emax - h->GetXaxis()->GetBinLowEdge(e_max_bin))/(h->GetXaxis()->GetBinUpEdge(e_max_bin)-h->GetXaxis()->GetBinLowEdge(e_max_bin));
     }
 
