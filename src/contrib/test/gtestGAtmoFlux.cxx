@@ -19,6 +19,8 @@
 #include <stdio>
 #include "Tools/Flux/GFLUKAAtmoFlux.h"
 
+typedef int testFunction(char *err);
+
 int testGetTotalFlux(void)
 {
   GAtmoFlux *atmo_flux_driver;
@@ -35,26 +37,39 @@ int testGetTotalFlux(void)
   atmo_flux_driver->ForceMinEnergy(emin * units::GeV);
   atmo_flux_driver->ForceMaxEnergy(emax * units::GeV);
   // set flux files:
-  map<int,string>::const_iterator file_iter = gOptFluxFiles.begin();
-  for( ; file_iter != gOptFluxFiles.end(); ++file_iter) {
-    int neutrino_code = file_iter->first;
-    string filename   = file_iter->second;
-    atmo_flux_driver->AddFluxFile(neutrino_code, filename);
-  }
+  atmo_flux_driver->AddFluxFile(12, "fmax20_i0403z.sno_nue");
   atmo_flux_driver->LoadFluxData();
-  // configure flux generation surface:
-  atmo_flux_driver->SetRadii(gOptRL, gOptRT);
-  // set rotation for coordinate tranformation from the topocentric horizontal
-  // system to a user-defined coordinate system:
-  if(!gOptRot.IsIdentity()) {
-     atmo_flux_driver->SetUserCoordSystem(gOptRot);
-  }
 
+  if (atmo_flux_driver->GetTotalFlux() == atmo_flux_driver->GetTotalFlux(emin,emax))
+    return 0;
+
+  return 1;
+}
+
+struct tests {
+    testFunction *test;
+    char *name;
+} tests[] = {
+    {testGetTotalFlux, "testGetTotalFlux"},
+};
 
 int main(int argc, char **argv)
 {
-  testReconfigInCommonPool();
-  testReconfigInOwnedModules();
+  int i;
+  char err[256];
+  int retval = 0;
+  struct tests test;
 
-  return 0;
+  for (i = 0; i < LEN(tests); i++) {
+    test = tests[i];
+
+    if (!test.test(err)) {
+      printf("[\033[92mok\033[0m] %s\n", test.name);
+    } else {
+      printf("[\033[91mfail\033[0m] %s: %s\n", test.name, err);
+      retval = 1;
+    }
+  }
+
+  return retval;
 }
