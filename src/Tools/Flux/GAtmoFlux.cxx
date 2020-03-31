@@ -648,16 +648,16 @@ double GAtmoFlux::GetTotalFlux(void)
   return flux;
 }
 
-/* Returns the total integrated flux between `emin` and `emax` in units of
- * 1/(m^2 s). */
-double GAtmoFlux::GetTotalFlux(double emin, double emax)
+/* Returns the total integrated flux in units of * 1/(m^2 s) between the
+ * minimum and maximum energy. */
+double GAtmoFlux::GetTotalFluxInEnergyRange(void)
 {
   double flux = 0.0;
   map<int,TH3D*>::iterator rawiter;
   int e_min_bin, e_max_bin;
 
-  if (emax < emin) {
-      LOG("Flux", pFATAL) << "emax = " << emax << " is less than emin = " << emin;
+  if (this->MinEnergy() < this->MinEnergy()) {
+      LOG("Flux", pFATAL) << "emax = " << this->MaxEnergy() << " is less than emin = " << this->MinEnergy();
       exit(-1);
   }
 
@@ -668,8 +668,8 @@ double GAtmoFlux::GetTotalFlux(double emin, double emax)
     if (!h) continue;
 
     /* Get the bins containing `emin` and `emax`. */
-    e_min_bin = h->GetXaxis()->FindBin(emin);
-    e_max_bin = h->GetXaxis()->FindBin(emax);
+    e_min_bin = h->GetXaxis()->FindBin(this->MinEnergy());
+    e_max_bin = h->GetXaxis()->FindBin(this->MaxEnergy());
 
     if (e_min_bin > h->GetXaxis()->GetNbins()) {
       /* If the minimum bin is past the end, continue. */
@@ -678,19 +678,19 @@ double GAtmoFlux::GetTotalFlux(double emin, double emax)
       /* If they both end up in the same bin, we just take the total bin
        * contents in that energy bin and multiply by the difference between
        * the energies. */
-      flux += h->Integral(e_min_bin,e_min_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")*(emax - emin)/(h->GetXaxis()->GetBinUpEdge(e_min_bin)-h->GetXaxis()->GetBinLowEdge(e_min_bin));
+      flux += h->Integral(e_min_bin,e_min_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")*(this->MaxEnergy() - this->MinEnergy())/(h->GetXaxis()->GetBinUpEdge(e_min_bin)-h->GetXaxis()->GetBinLowEdge(e_min_bin));
     } else {
       /* First we calculate the integral within that bin from `emin` to the top
        * edge of the bin. */
       if (e_min_bin > 0)
-          flux += h->Integral(e_min_bin,e_min_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")*(h->GetXaxis()->GetBinUpEdge(e_min_bin) - emin)/(h->GetXaxis()->GetBinUpEdge(e_min_bin)-h->GetXaxis()->GetBinLowEdge(e_min_bin));
+          flux += h->Integral(e_min_bin,e_min_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")*(h->GetXaxis()->GetBinUpEdge(e_min_bin) - this->MinEnergy())/(h->GetXaxis()->GetBinUpEdge(e_min_bin)-h->GetXaxis()->GetBinLowEdge(e_min_bin));
       /* Next, we calculate the integral for all the bins between the min and
        * max bin. */
       if (e_min_bin < h->GetXaxis()->GetNbins())
           flux += h->Integral(e_min_bin+1,e_max_bin-1,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width");
       /* Finally, we calculate the integral for the last bin. */
       if (e_max_bin <= h->GetXaxis()->GetNbins())
-          flux += h->Integral(e_max_bin,e_max_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")*(emax - h->GetXaxis()->GetBinLowEdge(e_max_bin))/(h->GetXaxis()->GetBinUpEdge(e_max_bin)-h->GetXaxis()->GetBinLowEdge(e_max_bin));
+          flux += h->Integral(e_max_bin,e_max_bin,1,h->GetYaxis()->GetNbins(),1,h->GetZaxis()->GetNbins(),"width")*(this->MaxEnergy() - h->GetXaxis()->GetBinLowEdge(e_max_bin))/(h->GetXaxis()->GetBinUpEdge(e_max_bin)-h->GetXaxis()->GetBinLowEdge(e_max_bin));
     }
 
     LOG("Flux", pDEBUG) << "Total flux for " << rawiter->first << " equals " << h->Integral("width") << ".";

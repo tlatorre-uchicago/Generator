@@ -98,7 +98,9 @@ public :
   TH3D*    GetFluxHistogram   (int flavour);
   /* Returns the total integrated flux in units of 1/(m^2 s). */
   double   GetTotalFlux       (void);
-  double   GetTotalFlux       (double emin, double emax);
+  /* Returns the total integrated flux in units of 1/(m^2 s) between `emin` and
+   * `emax`. */
+  double   GetTotalFluxInEnergyRange(void);
   double   GetFlux            (int flavour);
   double   GetFlux            (int flavour, double energy);
   double   GetFlux            (int flavour, double energy, double costh);

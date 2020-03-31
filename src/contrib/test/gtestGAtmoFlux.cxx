@@ -21,6 +21,7 @@
 #include "Tools/Flux/GAtmoFlux.h"
 #include "Framework/Conventions/Units.h"
 #include <stdlib.h> /* For getenv(). */
+#include "TH3D.h"
 
 /* Macro to compute the size of a static C array.
  *
@@ -41,8 +42,7 @@ int isclose(double a, double b, double rel_tol, double abs_tol)
 using namespace genie;
 using namespace genie::flux;
 
-/* Tests that GetTotalFlux() is the same as GetTotalFlux(emin,emax) when emin
- * is negative and emax is a crazy high number. */
+/* Tests the GetTotalFlux() function. */
 int testGetTotalFlux(char *err)
 {
   GAtmoFlux *atmo_flux_driver;
@@ -65,15 +65,52 @@ int testGetTotalFlux(char *err)
   atmo_flux_driver->AddFluxFile(12, filename);
   atmo_flux_driver->LoadFluxData();
 
-  if (atmo_flux_driver->GetTotalFlux() != atmo_flux_driver->GetTotalFlux(emin,emax)) {
-    sprintf(err, "GetTotalFlux(%.2f,%.2f) = %f which is not equal to the expected total flux = %f", emin, emax, atmo_flux_driver->GetTotalFlux(emin,emax), atmo_flux_driver->GetTotalFlux());
-    return 1;
-  }
-
   /* Test that GetTotalFlux() is the same as GetFlux(12) since we are only
    * including a single neutrino flavour. */
   if (atmo_flux_driver->GetTotalFlux() != atmo_flux_driver->GetFlux(12)) {
     sprintf(err, "GetTotalFlux() = %f which is not equal to GetFlux(12) = %f", atmo_flux_driver->GetTotalFlux(), atmo_flux_driver->GetFlux(12));
+    goto err;
+  }
+
+  delete atmo_flux_driver;
+
+  return 0;
+
+err:
+  delete atmo_flux_driver;
+
+  return 1;
+}
+
+/* Tests the GetTotalFluxInEnergyRange() function. */
+int testGetTotalFluxInEnergyRange(char *err)
+{
+  GAtmoFlux *atmo_flux_driver;
+  double emin, emax, value, expected;
+  char filename[256];
+
+  sprintf(filename, "%s/src/contrib/test/fmax20_i0403z.sno_nue", getenv("GENIE"));
+
+  GBGLRSAtmoFlux *bartol_flux = new GBGLRSAtmoFlux;
+  atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
+
+  // set flux files:
+  atmo_flux_driver->AddFluxFile(12, filename);
+  atmo_flux_driver->LoadFluxData();
+
+  emin = -1;
+  emax = 1e9;
+
+  // Configure GAtmoFlux options (common to all concrete atmospheric flux drivers)
+  // set min/max energy:
+  atmo_flux_driver->ForceMinEnergy(emin * units::GeV);
+  atmo_flux_driver->ForceMaxEnergy(emax * units::GeV);
+
+  value = atmo_flux_driver->GetTotalFlux();
+  expected = atmo_flux_driver->GetTotalFluxInEnergyRange();
+
+  if (value != expected) {
+    sprintf(err, "GetTotalFlux(%.2f,%.2f) = %f which is not equal to the expected total flux = %f", emin, emax, value, expected);
     return 1;
   }
 
@@ -81,7 +118,10 @@ int testGetTotalFlux(char *err)
   emin = 1e9;
   emax = 1e10;
 
-  value = atmo_flux_driver->GetTotalFlux(emin,emax);
+  atmo_flux_driver->ForceMinEnergy(emin * units::GeV);
+  atmo_flux_driver->ForceMaxEnergy(emax * units::GeV);
+
+  value = atmo_flux_driver->GetTotalFluxInEnergyRange();
   expected = 0;
 
   if (value != expected) {
@@ -93,7 +133,10 @@ int testGetTotalFlux(char *err)
   emin = 0;
   emax = 0.01;
 
-  value = atmo_flux_driver->GetTotalFlux(emin,emax);
+  atmo_flux_driver->ForceMinEnergy(emin * units::GeV);
+  atmo_flux_driver->ForceMaxEnergy(emax * units::GeV);
+
+  value = atmo_flux_driver->GetTotalFluxInEnergyRange();
   expected = 0;
 
   if (value != expected) {
@@ -105,7 +148,10 @@ int testGetTotalFlux(char *err)
   emin = 0.106;
   emax = 0.11;
 
-  value = atmo_flux_driver->GetTotalFlux(emin,emax);
+  atmo_flux_driver->ForceMinEnergy(emin * units::GeV);
+  atmo_flux_driver->ForceMaxEnergy(emax * units::GeV);
+
+  value = atmo_flux_driver->GetTotalFluxInEnergyRange();
   expected = atmo_flux_driver->GetFlux(12,emin)*(emax-emin);
 
   if (!isclose(value,expected,1e-5,0)) {
@@ -113,7 +159,29 @@ int testGetTotalFlux(char *err)
     return 1;
   }
 
+  /* Now we test when emin and emax are just past the low and high bin edges. */
+  emin = 0.10 + 1e-10;
+  emax = 10.0 - 1e-10;
+
+  atmo_flux_driver->ForceMinEnergy(emin * units::GeV);
+  atmo_flux_driver->ForceMaxEnergy(emax * units::GeV);
+
+  value = atmo_flux_driver->GetTotalFluxInEnergyRange();
+  expected = atmo_flux_driver->GetTotalFlux();
+
+  if (!isclose(value,expected,1e-5,0)) {
+  sprintf(err, "GetTotalFlux(%.3f,%.3f) = %f, but expected %f!", emin, emax, value, expected);
+    return 1;
+  }
+
+  delete atmo_flux_driver;
+
   return 0;
+
+err:
+  delete atmo_flux_driver;
+
+  return 1;
 }
 
 struct tests {
@@ -121,6 +189,7 @@ struct tests {
     const char *name;
 } tests[] = {
     {testGetTotalFlux, "testGetTotalFlux"},
+    {testGetTotalFluxInEnergyRange, "testGetTotalFluxInEnergyRange"},
 };
 
 int main(int argc, char **argv)

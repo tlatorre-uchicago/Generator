@@ -388,7 +388,7 @@ int main(int argc, char** argv)
   // Set GHEP print level
   GHepRecord::SetPrintLevel(RunOpt::Instance()->EventRecordPrintLevel());
 
-  total_flux = atmo_flux_driver->GetTotalFlux();
+  total_flux = atmo_flux_driver->GetTotalFluxInEnergyRange();
   LOG("gevgen_atmo", pNOTICE) << "Total atmospheric neutrino flux is " << setprecision(2) << total_flux << " neutrinos per m^2 per second.";
   if (gOptSecExposure > 0) {
     /* Calculate the expected value of the total number of neutrinos we need to
