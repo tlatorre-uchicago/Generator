@@ -32,17 +32,15 @@ typedef int testFunction(char *err);
 using namespace genie;
 using namespace genie::flux;
 
+/* Tests that GetTotalFlux() is the same as GetTotalFlux(emin,emax) when emin
+ * is negative and emax is a crazy high number. */
 int testGetTotalFlux(char *err)
 {
   GAtmoFlux *atmo_flux_driver;
-  double emin, emax;
+  double emin, emax, value, expected;
   char filename[256];
 
-  fprintf(stderr, "blah\n");
-
   sprintf(filename, "%s/src/contrib/test/fmax20_i0403z.sno_nue", getenv("GENIE"));
-
-  fprintf(stderr, "creating atmoflux\n");
 
   GBGLRSAtmoFlux *bartol_flux = new GBGLRSAtmoFlux;
   atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
@@ -50,20 +48,59 @@ int testGetTotalFlux(char *err)
   emin = -1;
   emax = 1e9;
 
-  fprintf(stderr, "forcing min energy\n");
   // Configure GAtmoFlux options (common to all concrete atmospheric flux drivers)
   // set min/max energy:
   atmo_flux_driver->ForceMinEnergy(emin * units::GeV);
   atmo_flux_driver->ForceMaxEnergy(emax * units::GeV);
   // set flux files:
-  fprintf(stderr, "adding flux file\n");
   atmo_flux_driver->AddFluxFile(12, filename);
-  fprintf(stderr, "loading data\n");
   atmo_flux_driver->LoadFluxData();
-  fprintf(stderr, "done loading data\n");
 
   if (atmo_flux_driver->GetTotalFlux() != atmo_flux_driver->GetTotalFlux(emin,emax)) {
-    sprintf(err, "GetTotalFlux(%.2f,%.2f) = %f which is not equalt to the expected total flux = %f", emin, emax, atmo_flux_driver->GetTotalFlux(emin,emax), atmo_flux_driver->GetTotalFlux());
+    sprintf(err, "GetTotalFlux(%.2f,%.2f) = %f which is not equal to the expected total flux = %f", emin, emax, atmo_flux_driver->GetTotalFlux(emin,emax), atmo_flux_driver->GetTotalFlux());
+    return 1;
+  }
+
+  /* Test that GetTotalFlux() is the same as GetFlux(12) since we are only
+   * including a single neutrino flavour. */
+  if (atmo_flux_driver->GetTotalFlux() != atmo_flux_driver->GetFlux(12)) {
+    sprintf(err, "GetTotalFlux() = %f which is not equal to GetFlux(12) = %f", atmo_flux_driver->GetTotalFlux(), atmo_flux_driver->GetFlux(12));
+    return 1;
+  }
+
+  /* Now set emin and emax both above the bounds and make sure we get 0. */
+  emin = 1e9;
+  emax = 1e10;
+
+  value = atmo_flux_driver->GetTotalFlux(emin,emax);
+  expected = 0;
+
+  if (value != expected) {
+    sprintf(err, "GetTotalFlux(%.1e,%.1e) = %f, but expected %f!", emin, emax, value, expected);
+    return 1;
+  }
+
+  /* Now set emin and emax both below the bounds and make sure we get 0. */
+  emin = 0;
+  emax = 0.01;
+
+  value = atmo_flux_driver->GetTotalFlux(emin,emax);
+  expected = 0;
+
+  if (value != expected) {
+    sprintf(err, "GetTotalFlux(%.1e,%.1e) = %f, but expected %f!", emin, emax, value, expected);
+    return 1;
+  }
+
+  /* Now we test when both emin and emax are in the same bin. */
+  emin = 0.106;
+  emax = 0.11;
+
+  value = atmo_flux_driver->GetTotalFlux(emin,emax);
+  expected = atmo_flux_driver->GetFlux(12,emin)*(emax-emin);
+
+  if (value != expected) {
+  sprintf(err, "GetTotalFlux(%.3f,%.3f) = %f, but expected %f!", emin, emax, value, expected);
     return 1;
   }
 
