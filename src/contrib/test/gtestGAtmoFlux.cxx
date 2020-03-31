@@ -29,6 +29,15 @@
 
 typedef int testFunction(char *err);
 
+int isclose(double a, double b, double rel_tol, double abs_tol)
+{
+    /* Returns 1 if a and b are "close". This algorithm is taken from Python's
+     * math.isclose() function.
+     *
+     * See https://www.python.org/dev/peps/pep-0485/. */
+    return fabs(a-b) <= fmax(rel_tol*fmax(fabs(a),fabs(b)),abs_tol);
+}
+
 using namespace genie;
 using namespace genie::flux;
 
@@ -99,7 +108,7 @@ int testGetTotalFlux(char *err)
   value = atmo_flux_driver->GetTotalFlux(emin,emax);
   expected = atmo_flux_driver->GetFlux(12,emin)*(emax-emin);
 
-  if (value != expected) {
+  if (!isclose(value,expected,1e-5,0)) {
   sprintf(err, "GetTotalFlux(%.3f,%.3f) = %f, but expected %f!", emin, emax, value, expected);
     return 1;
   }
