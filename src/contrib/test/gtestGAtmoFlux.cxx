@@ -17,7 +17,7 @@
 //____________________________________________________________________________
 //
 #include <cstdio>
-#include "Tools/Flux/GFLUKAAtmoFlux.h"
+#include "Tools/Flux/GBGLRSAtmoFlux.h"
 #include "Tools/Flux/GAtmoFlux.h"
 #include "Framework/Conventions/Units.h"
 #include <stdlib.h> /* For getenv(). */
@@ -44,8 +44,8 @@ int testGetTotalFlux(char *err)
 
   fprintf(stderr, "creating atmoflux\n");
 
-  GFLUKAAtmoFlux *fluka_flux = new GFLUKAAtmoFlux;
-  atmo_flux_driver = dynamic_cast<GAtmoFlux *>(fluka_flux);
+  GBGLRSAtmoFlux *bartol_flux = new GBGLRSAtmoFlux;
+  atmo_flux_driver = dynamic_cast<GAtmoFlux *>(bartol_flux);
 
   emin = -1;
   emax = 1e9;

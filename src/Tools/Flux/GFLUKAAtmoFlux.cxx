@@ -133,9 +133,13 @@ bool GFLUKAAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
 
   double scale = 1.0; // 1.0 [m^2], OR 1.0e-4 [cm^2]
 
+  printf("here\n");
+
   while ( !flux_stream.eof() ) {
     flux = 0.0;
     flux_stream >> energy >> j1 >> costheta >> j2 >> flux;
+    printf("blah\n");
+    sleep(1);
     if( flux>0.0 ){
       LOG("Flux", pINFO)
         << "Flux[Ev = " << energy
