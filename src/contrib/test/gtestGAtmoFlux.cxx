@@ -3,12 +3,11 @@
 
 \program gtestAlgorithms
 
-\brief   Program used for testing / debugging GENIE's Algorithms & AlgFactory
+\brief   Program used for testing the GAtmoFlux class
 
-\author  Costas Andreopoulos <constantinos.andreopoulos \at cern.ch>
- University of Liverpool & STFC Rutherford Appleton Laboratory
+\author  Anthony LaTorre <tlatorre at uchicago dot edu>
 
-\created October 26, 2006
+\created March 31, 2020
 
 \cpright Copyright (c) 2003-2020, The GENIE Collaboration
          For the full text of the license visit http://copyright.genie-mc.org
@@ -16,6 +15,7 @@
 */
 //____________________________________________________________________________
 //
+
 #include <cstdio>
 #include "Tools/Flux/GBGLRSAtmoFlux.h"
 #include "Tools/Flux/GAtmoFlux.h"
@@ -23,6 +23,8 @@
 #include <stdlib.h> /* For getenv(). */
 #include "TH3D.h"
 #include "Framework/Messenger/Messenger.h"
+
+#define UNUSED(V) ((void) V)
 
 /* Macro to compute the size of a static C array.
  *
@@ -66,10 +68,13 @@ int testGetTotalFlux(char *err)
   atmo_flux_driver->AddFluxFile(12, filename);
   atmo_flux_driver->LoadFluxData();
 
+  value = atmo_flux_driver->GetTotalFlux();
+  expected = atmo_flux_driver->GetFlux(12);
+
   /* Test that GetTotalFlux() is the same as GetFlux(12) since we are only
    * including a single neutrino flavour. */
-  if (atmo_flux_driver->GetTotalFlux() != atmo_flux_driver->GetFlux(12)) {
-    sprintf(err, "GetTotalFlux() = %f which is not equal to GetFlux(12) = %f", atmo_flux_driver->GetTotalFlux(), atmo_flux_driver->GetFlux(12));
+  if (value != expected) {
+    sprintf(err, "GetTotalFlux() = %f which is not equal to GetFlux(12) = %f", value, expected);
     goto err;
   }
 
@@ -112,7 +117,7 @@ int testGetTotalFluxInEnergyRange(char *err)
 
   if (value != expected) {
     sprintf(err, "GetTotalFlux(%.2f,%.2f) = %f which is not equal to the expected total flux = %f", emin, emax, value, expected);
-    return 1;
+    goto err;
   }
 
   /* Now set emin and emax both above the bounds and make sure we get 0. */
@@ -127,7 +132,7 @@ int testGetTotalFluxInEnergyRange(char *err)
 
   if (value != expected) {
     sprintf(err, "GetTotalFlux(%.1e,%.1e) = %f, but expected %f!", emin, emax, value, expected);
-    return 1;
+    goto err;
   }
 
   /* Now set emin and emax both below the bounds and make sure we get 0. */
@@ -156,8 +161,8 @@ int testGetTotalFluxInEnergyRange(char *err)
   expected = atmo_flux_driver->GetFlux(12,emin)*(emax-emin);
 
   if (!isclose(value,expected,1e-5,0)) {
-  sprintf(err, "GetTotalFlux(%.3f,%.3f) = %f, but expected %f!", emin, emax, value, expected);
-    return 1;
+    sprintf(err, "GetTotalFlux(%.3f,%.3f) = %f, but expected %f!", emin, emax, value, expected);
+    goto err;
   }
 
   /* Now we test when emin and emax are just past the low and high bin edges. */
@@ -172,7 +177,7 @@ int testGetTotalFluxInEnergyRange(char *err)
 
   if (!isclose(value,expected,1e-5,0)) {
   sprintf(err, "GetTotalFlux(%.3f,%.3f) = %f, but expected %f!", emin, emax, value, expected);
-    return 1;
+    goto err;
   }
 
   delete atmo_flux_driver;
@@ -195,10 +200,13 @@ struct tests {
 
 int main(int argc, char **argv)
 {
-  int i;
+  unsigned int i;
   char err[256];
   int retval = 0;
   struct tests test;
+
+  UNUSED(argc);
+  UNUSED(argv);
 
   /* Don't print low level messages so we get a nice output. */
   Messenger * msg = Messenger::Instance();
