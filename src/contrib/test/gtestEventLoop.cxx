@@ -24,11 +24,11 @@
 #include <TIterator.h>
 
 #include "EVGCore/EventRecord.h"
-#include "GHEP/GHepParticle.h"
+#include "Framework/GHEP/GHepParticle.h"
 #include "Ntuple/NtpMCFormat.h"
 #include "Ntuple/NtpMCTreeHeader.h"
 #include "Ntuple/NtpMCEventRecord.h"
-#include "Messenger/Messenger.h"
+#include "Framework/Messenger/Messenger.h"
 #include "PDG/PDGCodes.h"
 #include "Utils/CmdLnArgParser.h"
 

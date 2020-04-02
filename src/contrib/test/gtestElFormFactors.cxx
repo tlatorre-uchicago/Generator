@@ -21,12 +21,12 @@
 #include <TFile.h>
 #include <TNtupleD.h>
 
-#include "Algorithm/Algorithm.h"
-#include "Algorithm/AlgFactory.h"
+#include "Framework/Algorithm/Algorithm.h"
+#include "Framework/Algorithm/AlgFactory.h"
 #include "ElFF/ELFormFactors.h"
 #include "ElFF/ELFormFactorsModelI.h"
 #include "Interaction/Interaction.h"
-#include "Messenger/Messenger.h"
+#include "Framework/Messenger/Messenger.h"
 #include "PDG/PDGCodes.h"
 
 using namespace genie;

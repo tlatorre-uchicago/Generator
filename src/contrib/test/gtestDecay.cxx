@@ -24,10 +24,10 @@
 #include <TParticlePDG.h>
 #include <TIterator.h>
 
-#include "Algorithm/Algorithm.h"
-#include "Algorithm/AlgFactory.h"
-#include "Conventions/Units.h"
-#include "Conventions/Constants.h"
+#include "Framework/Algorithm/Algorithm.h"
+#include "Framework/Algorithm/AlgFactory.h"
+#include "Framework/Conventions/Units.h"
+#include "Framework/Conventions/Constants.h"
 #include "Decay/Decayer.h"
 #include "Decay/PythiaDecayer.h"
 #include "Framework/GHEP/GHepStatus.h"

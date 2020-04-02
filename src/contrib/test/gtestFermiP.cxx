@@ -23,9 +23,9 @@
 #include <TVector3.h>
 
 #include "../Interfaces/NuclearModelI.h"
-#include "Algorithm/AlgFactory.h"
+#include "Framework/Algorithm/AlgFactory.h"
 #include "Interaction/Target.h"
-#include "Messenger/Messenger.h"
+#include "Framework/Messenger/Messenger.h"
 #include "PDG/PDGCodes.h"
 #include "Utils/PrintUtils.h"
 

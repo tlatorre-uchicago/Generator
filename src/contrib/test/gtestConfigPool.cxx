@@ -16,9 +16,9 @@
 */
 //____________________________________________________________________________
 
-#include "Algorithm/Algorithm.h"
-#include "Algorithm/AlgFactory.h"
-#include "Algorithm/AlgConfigPool.h"
+#include "Framework/Algorithm/Algorithm.h"
+#include "Framework/Algorithm/AlgFactory.h"
+#include "Framework/Algorithm/AlgConfigPool.h"
 #include "Base/QELFormFactorsModelI.h"
 #include "ElFF/ELFormFactorsModelI.h"
 #include "Messenger/Messenger.h"

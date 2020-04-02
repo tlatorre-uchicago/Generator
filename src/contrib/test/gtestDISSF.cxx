@@ -33,8 +33,8 @@
 #include <TFile.h>
 #include <TTree.h>
 
-#include "Algorithm/Algorithm.h"
-#include "Algorithm/AlgFactory.h"
+#include "Framework/Algorithm/Algorithm.h"
+#include "Framework/Algorithm/AlgFactory.h"
 #include "Base/DISStructureFunc.h"
 #include "Base/DISStructureFuncModelI.h"
 #include "Messenger/Messenger.h"
