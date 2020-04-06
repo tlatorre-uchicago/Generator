@@ -19,9 +19,9 @@
 #include "Framework/Algorithm/Algorithm.h"
 #include "Framework/Algorithm/AlgFactory.h"
 #include "Framework/Algorithm/AlgConfigPool.h"
-#include "Base/QELFormFactorsModelI.h"
-#include "ElFF/ELFormFactorsModelI.h"
-#include "Messenger/Messenger.h"
+#include "Physics/QuasiElastic/XSection/QELFormFactorsModelI.h"
+#include "Physics/QuasiElastic/XSection/ELFormFactorsModelI.h"
+#include "Framework/Messenger/Messenger.h"
 
 using namespace genie;
 

@@ -46,12 +46,12 @@
 #include "Physics/QuasiElastic/XSection/AxialFormFactorModelI.h"
 #include "Physics/QuasiElastic/XSection/AxialFormFactor.h"
 #include "Framework/Interaction/Interaction.h"
-#include "Messenger/Messenger.h"
-#include "PDG/PDGCodes.h"
-#include "PDG/PDGLibrary.h"
-#include "PDG/PDGUtils.h"
-#include "Utils/CmdLnArgParser.h"
-#include "Utils/StringUtils.h"
+#include "Framework/Messenger/Messenger.h"
+#include "Framework/ParticleData/PDGCodes.h"
+#include "Framework/ParticleData/PDGLibrary.h"
+#include "Framework/ParticleData/PDGUtils.h"
+#include "Framework/Utils/CmdLnArgParser.h"
+#include "Framework/Utils/StringUtils.h"
 
 // number of coefficient values stored in tree
 #define MAX_COEF 3

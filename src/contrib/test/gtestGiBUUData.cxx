@@ -24,9 +24,9 @@
 
 #include "BaryonResonance/BaryonResUtils.h"
 #include "GiBUU/GiBUUData.h"
-#include "Messenger/Messenger.h"
+#include "Framework/Messenger/Messenger.h"
 #include "Numerical/Spline.h"
-#include "PDG/PDGCodes.h"
+#include "Framework/ParticleData/PDGCodes.h"
 
 using namespace genie;
 using namespace genie::utils;

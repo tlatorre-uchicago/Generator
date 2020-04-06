@@ -50,11 +50,11 @@
 #include "Interaction/ProcessInfo.h"
 #include "Interaction/InitialState.h"
 #include "Interaction/Interaction.h"
-#include "Messenger/Messenger.h"
-#include "PDG/PDGCodes.h"
-#include "PDG/PDGUtils.h"
-#include "Utils/FragmRecUtils.h"
-#include "Utils/CmdLnArgParser.h"
+#include "Framework/Messenger/Messenger.h"
+#include "Framework/ParticleData/PDGCodes.h"
+#include "Framework/ParticleData/PDGUtils.h"
+#include "Framework/Utils/FragmRecUtils.h"
+#include "Framework/Utils/CmdLnArgParser.h"
 
 using std::string;
 using std::vector;

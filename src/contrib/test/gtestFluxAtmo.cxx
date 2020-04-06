@@ -24,8 +24,8 @@
 
 #include "FluxDrivers/GFlukaAtmo3DFlux.h"
 #include "FluxDrivers/GBartolAtmoFlux.h"
-#include "Messenger/Messenger.h"
-#include "PDG/PDGCodes.h"
+#include "Framework/Messenger/Messenger.h"
+#include "Framework/ParticleData/PDGCodes.h"
 
 using namespace genie;
 using namespace genie::flux;

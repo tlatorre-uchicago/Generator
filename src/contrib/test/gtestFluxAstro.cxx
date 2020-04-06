@@ -19,8 +19,8 @@
 #include <TFile.h>
 #include <TNtuple.h>
 
-#include "Conventions/Constants.h"
-#include "Conventions/Units.h"
+#include "Framework/Conventions/Constants.h"
+#include "Framework/Conventions/Units.h"
 #include "FluxDrivers/GAstroFlux.h"
 #include "Messenger/Messenger.h"
 #include "PDG/PDGCodes.h"

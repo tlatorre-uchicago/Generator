@@ -24,10 +24,10 @@
 
 #include "../Interfaces/NuclearModelI.h"
 #include "Framework/Algorithm/AlgFactory.h"
-#include "Interaction/Target.h"
+#include "Framework/Interaction/Target.h"
 #include "Framework/Messenger/Messenger.h"
-#include "PDG/PDGCodes.h"
-#include "Utils/PrintUtils.h"
+#include "Framework/ParticleData/PDGCodes.h"
+#include "Framework/Utils/PrintUtils.h"
 
 using namespace genie;
 
